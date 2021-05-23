@@ -1,8 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-//210301 遂に作った 宝箱クラス
+//210301 宝箱クラス
 [System.Serializable]
 public class TreasureBox
 {

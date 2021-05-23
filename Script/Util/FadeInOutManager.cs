@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using DG.Tweening;
 
+//フェードインフェードアウトとシーン変更、ゲーム終了を実行する重要クラス
 public class FadeInOutManager : MonoBehaviour
 {
     [SerializeField] BattleMapManager battleMapManager;
@@ -113,7 +114,7 @@ public class FadeInOutManager : MonoBehaviour
         isFadeOut = true;
     }
 
-    //200814 とりあえずマップ用 画面を暗転させて、完全に暗くなったらモード変更
+    //200814 マップ用 画面を暗転させて、完全に暗くなったらモード変更
     public void FadeoutAndFadeinStart(MapMode mapMode)
     {
         Debug.Log("FadeOutAndFadeIn Start");
@@ -170,6 +171,7 @@ public class FadeInOutManager : MonoBehaviour
         }
     }
 
+    //フェードアウト フェードアウト後は彩度フェードイン、シーン変更、ゲーム終了等処理を分岐する
     private void FadeOut()
     {
         if (deltaTime >= 0.01) { 
@@ -208,6 +210,7 @@ public class FadeInOutManager : MonoBehaviour
         }
     }
 
+    //フェードイン
     private void FadeIn()
     {
         if (deltaTime >= 0.01)
@@ -228,6 +231,7 @@ public class FadeInOutManager : MonoBehaviour
         }
     }
 
+    //画面がフェードインフェードアウト中か判定 基本的にフェード処理中は操作させないこと
     public bool isFadeinFadeout()
     {
         //isFadeoutAndFadeinは戦闘マップの開始時、画面を一度暗転させている処理のこと

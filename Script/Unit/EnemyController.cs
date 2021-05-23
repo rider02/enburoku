@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Battleシーンで作成 本番では使用しないクラスかも
+/// Battleシーンで作成 戦闘テスト用で本番では使用しないクラス
 /// </summary>
 public class EnemyController : MonoBehaviour
 {

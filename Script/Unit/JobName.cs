@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 職業一覧
+/// 職業の列挙型
 /// </summary>
 public enum JobName
 {
@@ -85,6 +85,7 @@ public enum JobName
     [StringValue("穢れ無き月人の従。傷を負うと性格が豹変する。")]
     綿月の戦士,
 
+    //210522 TODO 紅魔館キャラの職業解説追加する
     門番,
     虹色の門番,
     悪魔の守護者,

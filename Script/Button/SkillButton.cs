@@ -1,26 +1,27 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
-//200726 ステータス画面にスキルを表示する用のボタン
+/// <summary>
+/// 200726 ステータス画面にスキルを表示する用のボタン
+/// ステータス画面、戦闘画面の2シーンのステータス画面から共通で使用される
+/// </summary>
 public class SkillButton : MonoBehaviour
 {
-    //スキル名
-    [SerializeField]
-    private Text skillNameText;
-    private Skill skill;
+    [SerializeField] private Text skillNameText;    //スキル名
+    private Skill skill;                            //スキル
 
+    //参照
     private StatusManager statusManager;
     private BattleMapManager battleMapManager;
 
+    //初期化メソッド 戦闘画面
     public void Init(StatusManager statusManager, BattleMapManager battleMapManager)
     {
         this.statusManager = statusManager;
         this.battleMapManager = battleMapManager;
     }
 
-    //初期化メソッド(ステータス画面で使用する場合)
+    //初期化メソッド ステータス画面
     public void Init(Skill skill, StatusManager statusManager)
     {
         //配下の名前、回数、値段を設定
@@ -45,9 +46,10 @@ public class SkillButton : MonoBehaviour
     public void Onclick()
     {
 
-        //とりあえず無し
+        //TODO 210522もしスキル付け外しを実装するならここに処理を追加
     }
 
+    //選択するとスキルの解説ウィンドウを表示する
     public void OnSelect()
     {
         //StatusManagerとBattleMapManagerで初期化されている場合の2種類が有る
@@ -57,7 +59,7 @@ public class SkillButton : MonoBehaviour
         }
         else if (battleMapManager != null)
         {
-            //210226 TODO まだマップ用ではフォーカスで詳細が出る機能無し 忘れないように
+            //210226 TODO まだマップ用ではフォーカスで詳細が出る機能無し
         }
     }
 }

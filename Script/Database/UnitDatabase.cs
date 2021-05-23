@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 /// <summary>
-/// ユニット一覧のクラス
+/// ユニット一覧ScriptableObject精製用クラス
 /// </summary>
 public class UnitDatabase : ScriptableObject
 {

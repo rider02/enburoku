@@ -33,7 +33,7 @@ public class KeyConfigManager : MonoBehaviour
         LoadKeyConfig(configFilePath);
     }
 
-    //キーコンフィグのロード(開発でタイトル画面以外から開始した時)
+    //キーコンフィグのロード(開発でタイトル画面以外から開始した時、本番は呼ばれない)
     public static void InitKeyConfig(string configFilePath)
     {
         configMap = new Dictionary<KeyConfigType, KeyCode>();
@@ -52,12 +52,12 @@ public class KeyConfigManager : MonoBehaviour
         //存在すればロード実行
         if (File.Exists(configFilePath))
         {
-            BinaryFormatter bf = new BinaryFormatter();
             // 指定したパスのファイルストリームを開く
+            BinaryFormatter bf = new BinaryFormatter();
             FileStream file = File.Open(configFilePath, FileMode.Open);
             try
             {
-                // 指定したファイルストリームをデシリアライズ
+                // 指定したファイルストリームをデシリアライズして取得
                 configMap = (Dictionary<KeyConfigType, KeyCode>)bf.Deserialize(file);
                 Debug.Log("キーコンフィグをロードしました");
 
@@ -71,12 +71,13 @@ public class KeyConfigManager : MonoBehaviour
         }
         else
         {
-            //初回起動時等、キーコンフィグファイルが存在しない場合は作成
+            //初回起動時等、キーコンフィグファイルが存在しない場合はデフォルト作成
             Debug.Log($"WARN : キーコンフィグファイルが存在しません path : {configFilePath}");
             InitKeyConfig(configFilePath);
         }
     }
 
+    //キーコンフィグ保存 コンフィグUIを閉じる時のみ呼ばれる
     public void SaveKeyConfig(string configFilePath)
     {
         BinaryFormatter bf = new BinaryFormatter();
@@ -122,18 +123,19 @@ public class KeyConfigManager : MonoBehaviour
         return false;
     }
 
-    //引数の機能(決定、キャンセル)にアサインされているキーが押下状態かを返す
+    //引数の機能(決定、キャンセル等)にアサインされているキーが押下状態かを返す
     public static bool GetKey(KeyConfigType keyConfigType)
     {
         return InputKeyCheck(keyConfigType, Input.GetKey);
     }
 
-    //引数の機能(決定、キャンセル)にアサインされているキーが入力されたかを返す
+    //引数の機能(決定、キャンセル等)にアサインされているキーが入力されたかを返す
     public static bool GetKeyDown(KeyConfigType keyConfigType)
     {
         return InputKeyCheck(keyConfigType, Input.GetKeyDown);
     }
 
+    //引数の機能(決定、キャンセル等)にアサインされているキーが押下されていないかを返す
     public static bool GetKeyUp(KeyConfigType keyConfigType)
     {
         return InputKeyCheck(keyConfigType, Input.GetKeyUp);
@@ -152,7 +154,7 @@ public class KeyConfigManager : MonoBehaviour
         return false;
     }
 
-    //UGUIのボタンをクリックする
+    //UGUIのボタンをクリックをスクリプトから実行する処理
     public static void ButtonClick()
     {
         GameObject obj = EventSystem.current.currentSelectedGameObject;
@@ -194,9 +196,10 @@ public class KeyConfigManager : MonoBehaviour
     //Updateで実行され、キーが入力されたらそのキーを処理に割り当てる
     public void KeyAssign()
     {
-        if (Input.GetButtonDown("Submit") || Input.GetButtonDown("Cancel"))
+        if (Input.GetButtonDown("Submit") || Input.GetButtonDown("Cancel") ||
+            Input.GetButtonDown("Menu") || Input.GetButtonDown("Zoom") || Input.GetButtonDown("Speed"))
         {
-            Debug.Log("InputManagerにアサインされている決定、キャンセルボタンは割り当て出来ません");
+            Debug.Log("既にInputManagerにアサインされているボタンは割り当て出来ません");
             return;
         }
 
@@ -259,7 +262,7 @@ public class KeyConfigManager : MonoBehaviour
         configMap.Add(KeyConfigType.ZOOM, KeyCode.JoystickButton7);
     }
 
-    //起動時にボタン一覧を作成する
+    //タイトル画面起動時にキーコンフィグ設定UIのボタン一覧を作成する
     public void CreateConfigButtonList(GameObject keyConfigWindow)
     {
         int index = 0;

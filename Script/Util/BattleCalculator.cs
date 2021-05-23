@@ -1,58 +1,68 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using System.Linq;
+﻿using UnityEngine;
 
 /// <summary>
-/// 色々渡すと戦闘の数値を計算して返してくれるクラス
+/// 戦闘に使用
+/// 戦闘するユニットと敵を渡すと戦闘の数値を計算して返してくれるクラス
 /// </summary>
 public class BattleCalculator : MonoBehaviour
 {
-
-    public int unitAttack { get; set; }
-
-    //スキル発動率計算の為使用
-    public int unitLuk { get; set; }
-
-    public int unitDex { get; set; }
-
-    public int healAmount { get; set; }
+    //ユニットの攻撃力、命中率、必殺率
+    public int unitAttack { get; set; } 
     public int unitHitRate { get; set; }
     public int unitCriticalRate { get; set; }
 
-    public bool unitChaseFlag { get; set; }
-
+    
+    //敵の攻撃力、命中率、必殺率
     public int enemyAttack { get; set; }
     public int enemyHitRate { get; set; }
     public int enemyCriticalRate { get; set; }
 
-    public int enemyLuk { get; set; }
-
-    public int enemyDex { get; set; }
-
+    //追撃フラグ trueなら2回攻撃
+    public bool unitChaseFlag { get; set; }
     public bool enemyChaseFlag { get; set; }
 
-    //210220 戦闘に使用するのでフラグを保持しておく
+    //運と技 スキル発動率計算の為使用
+    public int unitLuk { get; set; }
+    public int unitDex { get; set; }
+
+    public int enemyLuk { get; set; }
+    public int enemyDex { get; set; }
+
+    //ユニットの回復量
+    public int healAmount { get; set; } 
+
+    //210220 攻撃可否フラグ
     public bool isUnitAttackable { get; set; }
 
     public bool isEnemyAttackable { get; set; }
 
 
-    //ユニット、敵、武器を受け取るとダメージ、命中率などを計算してDTOに詰めて返してくれる
+    /// <summary>
+    /// ユニット、敵、武器を受け取るとダメージ、命中率などを計算してDTOに詰めて返してくれる
+    /// </summary>
+    /// <param name="unit">ユニット名</param>
+    /// <param name="unitWeapon">ユニットの武器</param>
+    /// <param name="unitCell">ユニットの地形</param>
+    /// <param name="enemy">敵</param>
+    /// <param name="enemyCell">敵の地形</param>
+    /// <param name="isPlayerAttack">プレイヤーからの攻撃か</param>
+    /// <returns></returns>
     public BattleParameterDTO CalculateBattleParameter(Unit unit, Weapon unitWeapon, Main_Cell unitCell, Enemy enemy, Main_Cell enemyCell,
         bool isPlayerAttack)
     {
+        //戻り値を詰めるクラス
         BattleParameterDTO battleParameterDTO = new BattleParameterDTO();
+
+        //職業ステータス補正が入ったクラス
         JobStatusDto jobstatusDto = unit.job.statusDto;
 
-        SkillManager skillManager = new SkillManager();
-
-        //スキル「狂化」判定 ステータスに反映するので最初にやらざるを得ない
+        //スキル「狂化」判定 ステータスに反映するので最初に判定
         bool isUnitBerserk = false;
         bool isEnemyBerserk = false;
 
-        bool isCloseAttack;
+        bool isCloseAttack; //近接攻撃フラグ
+
+        ///ユニットの計算
 
         //210218 ステータスと職業による基礎値の計算 他に装備品補正、バフ、デバフ、スキル判定が必要
         int unitMaxHp = unit.maxhp + jobstatusDto.jobHp;
@@ -64,7 +74,7 @@ public class BattleCalculator : MonoBehaviour
         int unitLdef = unit.ldef + jobstatusDto.jobLdef;
         int unitCdef = unit.cdef + jobstatusDto.jobCdef;
 
-        //210218 バフを反映する処理を追加 GetBuffedStatusを投げるだけで返って来るぞ
+        //210218 バフを反映する処理を追加
         StatusDto buffedStatus = new StatusDto(unitMaxHp, unitLatk, unitCatk, unitAgi, unitDex, unitLdef, unitCdef, unitLuk);
         StatusCalculator statusCalculator = new StatusCalculator();
 
@@ -92,6 +102,8 @@ public class BattleCalculator : MonoBehaviour
         unitLdef = buffedStatus.ldef;
         unitCdef = buffedStatus.cdef;
 
+        ///敵の計算
+
         //210227 敵のステータスも上級職補正等は職業から取得する用に変更
         JobStatusDto enemyJobStatusDto = enemy.job.statusDto;
 
@@ -105,9 +117,10 @@ public class BattleCalculator : MonoBehaviour
         int enemyLdef = enemy.ldef + enemyJobStatusDto.jobLdef;
         int enemyCdef = enemy.cdef + enemyJobStatusDto.jobCdef;
 
-        //210218 バフを反映する処理を追加 GetBuffedStatusを投げるだけで返って来るぞ
+        //210218 敵のバフを反映する処理
         StatusDto enemyBuffedStatus = new StatusDto(enemyMaxHp, enemyLatk, enemyCatk, enemyAgi, enemyDex, enemyLdef, enemyCdef, enemyLuk);
 
+        //スキル「狂化」判定
         if (enemy.hp != statusCalculator.CalcHpBuff(enemyMaxHp, enemy.job.skills) && enemy.job.skills.Contains(Skill.狂化))
         {
             isEnemyBerserk = true;
@@ -133,7 +146,7 @@ public class BattleCalculator : MonoBehaviour
 
 
 
-        //210226 スキル「飛燕の一撃」、金剛の一撃、鬼神の一撃
+        //210226 自分から攻撃した場合、ダメージが上がるスキル
         //これはステータス画面には表示しないのでstatusCalculator不使用
         //プレイヤーから攻撃した時
         if (isPlayerAttack){
@@ -183,10 +196,10 @@ public class BattleCalculator : MonoBehaviour
             }
         }
 
-        //慧眼の一撃はまた別の場所で実装
+        //慧眼の一撃(命中率上がるやつ)はまた別の場所で実装
 
 
-        //210219 地形効果
+        //210219 地形効果を味方、敵のセルから取得
         int unitTerrainHit;
         int unitTerrainDef;
 
@@ -218,11 +231,10 @@ public class BattleCalculator : MonoBehaviour
             enemyTerrainDef = enemyCell.Defence;
         }
 
-        //スキル判定 目隠し
+        //スキル判定 目隠し 攻撃を受けた時、回避+20%、守備+2
         bool isUnitBlind = false;
         bool isEnemyBlind = false;
         
-        //攻撃を受けた場合、ユニットが目隠しを持っていれば
         if (!isPlayerAttack && unit.job.skills.Contains(Skill.目隠し)) {
             Debug.Log($"{unit.name} スキル :{Skill.目隠し.ToString()}, {Skill.目隠し.GetStringValue()}");
             isEnemyBlind = true;
@@ -233,7 +245,10 @@ public class BattleCalculator : MonoBehaviour
             isUnitBlind = true;
         }
 
-        //210220 まず攻撃可否を確認 座標の絶対値の合計が距離で、その値が武器の射程距離以下なら反撃可能となる
+
+
+        //210220 攻撃可否を確認
+        //座標の絶対値の合計が距離で、その値が武器の射程距離以下なら反撃可能となる
         //射程距離が1の場合、武器が近距離攻撃可能の場合は反撃可能となる
         //距離を取得
         int distance = Mathf.Abs(unitCell.X - enemyCell.X) + Mathf.Abs(unitCell.Y - enemyCell.Y);
@@ -244,7 +259,7 @@ public class BattleCalculator : MonoBehaviour
         isCloseAttack = (distance == 1) ? true : false;
         Debug.Log($"近距離攻撃か:{isCloseAttack}");
 
-        //武器の射程距離が距離よりも少ない場合
+        //武器の射程距離が距離よりも少ない場合は攻撃不可
         if (unitWeapon.range < distance)
         {
             isUnitAttackable = false;
@@ -252,6 +267,7 @@ public class BattleCalculator : MonoBehaviour
         else if (distance == 1 && !unitWeapon.isCloseAttack)
         {
             //武器の射程距離内だが、射程が1で近距離攻撃可能ではない場合
+            //(射程2以上の武器は、近距離攻撃フラグが無い場合は近距離攻撃出来ない)
             isUnitAttackable = false;
         }
         else
@@ -259,7 +275,7 @@ public class BattleCalculator : MonoBehaviour
             isUnitAttackable = true;
         }
 
-        //反撃不可武器は天狗のカメラのみなので・・・
+        //天狗のカメラは反撃不可
         if (enemy.equipWeapon.name == "天狗のカメラ" && !isPlayerAttack)
         {
             isUnitAttackable = false;
@@ -268,14 +284,13 @@ public class BattleCalculator : MonoBehaviour
         battleParameterDTO.isUnitAttackable = isUnitAttackable;
         Debug.Log($"ユニットの攻撃可否:{battleParameterDTO.isUnitAttackable}");
 
-        //敵の攻撃可否判定
+        //敵の攻撃可否判定 プレイヤーと同じ
         if (enemy.equipWeapon.range < distance)
         {
             isEnemyAttackable = false;
         }
         else if (distance == 1 && !enemy.equipWeapon.isCloseAttack)
         {
-            //武器の射程距離内だが、射程が1で近距離攻撃可能ではない場合
             isEnemyAttackable = false;
         }
         else
@@ -292,17 +307,18 @@ public class BattleCalculator : MonoBehaviour
         battleParameterDTO.isEnemyAttackable = isEnemyAttackable;
         Debug.Log($"敵の攻撃可否:{battleParameterDTO.isEnemyAttackable}");
 
+
+
         ///攻撃力計算
-        ///力＋武器威力*特効なら3倍 - 敵防御 - 地形効果
-        //とりあえず遠距離攻撃 特効まだ反映してない
+        //TODO 武器を持っていない状態で攻撃される場合を考慮する
         int unitWeaponAttack = unitWeapon.attack;
 
-        //NONE以外の場合は何かしら特効対象が有るって事
+        //NONE以外の場合は何かしら特効対象が有るということ
         //かつ武器の特効対象と敵の種族が一致した場合は特効
         if (unitWeapon.slayer != RaceType.NONE &&
             unitWeapon.slayer == enemy.race)
         {
-            //武器威力を3倍にして特効フラグを立てる
+            //武器威力を3倍にして特効フラグを立てる 特効時は文字の色が変わる
             unitWeaponAttack *= 3;
             battleParameterDTO.isUnitAttackSlayer = true;
         }
@@ -311,6 +327,7 @@ public class BattleCalculator : MonoBehaviour
         int unitRefAttack = isCloseAttack ? unitCatk : unitLatk;
         int enemydef = isCloseAttack ? enemyCdef : enemyLdef;
 
+        //力＋武器威力*特効なら3倍 - 敵防御 - 地形効果
         unitAttack = (unitRefAttack + unitWeaponAttack) - enemydef - enemyTerrainDef;
 
         //スキル目隠し 敵の回避+20、守備+2
@@ -319,14 +336,14 @@ public class BattleCalculator : MonoBehaviour
             unitAttack -= 2;
         }
 
-        //スキル「密室の守り」
+        //スキル「密室の守り」自分が地形効果0以外の場所で戦闘時、受けるダメージ-3
         if ((enemyTerrainHit != 0 || enemyTerrainDef != 0) && enemy.job.skills.Contains(Skill.密室の守り))
         {
             unitAttack -= 3;
             Debug.Log($"{enemy.name}: スキル{Skill.密室の守り} 効果{Skill.密室の守り.GetStringValue()}");
         }
 
-        //スキル「死線」
+        //スキル「死線」 敵に与えるダメージ+10、敵から受けるダメージ+10
         if (unit.job.skills.Contains(Skill.死線))
         {
             //ユニットが持っていれば攻撃力アップ
@@ -340,9 +357,12 @@ public class BattleCalculator : MonoBehaviour
             Debug.Log($"{enemy.name}: スキル{Skill.死線} 効果{Skill.死線.GetStringValue()}");
         }
 
+        //0～100の間に訂正
         unitAttack = CorrectParameter(unitAttack);
+        battleParameterDTO.unitAttack = unitAttack;
 
-        //敵は武器を持っていない可能性が有るし、反撃出来ない可能性も有るけどまだ考慮してない
+        //敵の攻撃力計算 プレイヤーと同じ
+        //TODO 敵は武器を持っていない可能性が有るけどまだ考慮してない
         if (enemy.equipWeapon != null)
         {
             //敵も特効の計算
@@ -365,6 +385,7 @@ public class BattleCalculator : MonoBehaviour
                 enemyAttack -= 2;
             }
 
+            //スキル「密室の守り」自分が地形効果0以外の場所で戦闘時、受けるダメージ-3
             if ((unitTerrainHit != 0 || unitTerrainDef != 0) && unit.job.skills.Contains(Skill.密室の守り))
             {
                 enemyAttack -= 3;
@@ -374,41 +395,38 @@ public class BattleCalculator : MonoBehaviour
             //スキル「死線」
             if (unit.job.skills.Contains(Skill.死線))
             {
-                //ユニットが持っていれば攻撃力アップ
                 enemyAttack += 10;
                 Debug.Log($"{unit.name}: スキル{Skill.死線} 効果{Skill.死線.GetStringValue()}");
             }
             if (enemy.job.skills.Contains(Skill.死線))
             {
-                //敵が持っていれば受けるダメージアップ
                 enemyAttack += 10;
                 Debug.Log($"{enemy.name}: スキル{Skill.死線} 効果{Skill.死線.GetStringValue()}");
             }
 
+            
             battleParameterDTO.enemyAttack = CorrectParameter(enemyAttack);
         }
 
+
         ///命中率計算
-        ///物理命中率＝物理命中＋連携効果－敵物理回避－地形効果 210219 地形効果を追加
+        //物理命中率＝物理命中－敵物理回避－地形効果
         //3すくみの乗っていない命中率計算 まだマイナス、100%以上になってもよい
         unitHitRate = (unitDex + unitWeapon.hitRate) - enemyAgi - enemyTerrainHit;
 
         //敵が武器を持っていれば、敵の命中率計算
         if (enemy.equipWeapon != null)
         {
-
-            //まだマイナス、100%以上になってもよい
+            
             enemyHitRate = (enemyDex + enemy.equipWeapon.hitRate) - unitAgi - unitTerrainHit;
         }
         else
         {
-            //無ければ参照されることは無いが一旦0
+            //無ければUI表示は「-」となり参照されることは無いが一旦0
             enemyHitRate = 0;
         }
 
-        //DTOにセットと、戦闘での計算用に本クラスに保持しておく
-
-        //210226 スキル「一撃離脱反映」 場所変わるかも
+        //210226 スキル「一撃離脱反映」自分から攻撃時、回避+30
         //プレイヤーの一撃離脱反映
         if (isPlayerAttack && unit.job.skills.Contains(Skill.一撃離脱))
         {
@@ -422,7 +440,7 @@ public class BattleCalculator : MonoBehaviour
             Debug.Log($"{enemy.name}: スキル{Skill.一撃離脱} 回避+30");
         }
 
-        //スキル「慧眼の一撃」判定
+        //スキル「慧眼の一撃」判定 自分から攻撃時命中+40%
         if (isPlayerAttack && unit.job.skills.Contains(Skill.慧眼の一撃))
         {
             unitHitRate += 40;
@@ -494,8 +512,6 @@ public class BattleCalculator : MonoBehaviour
             Debug.Log($"{enemy.name}: スキル{Skill.狂化} 効果{Skill.狂化.GetStringValue()}");
         }
 
-
-
         //スキル「目隠し」判定  敵の回避+20、守備+2
         if (isUnitBlind)
         {
@@ -506,18 +522,16 @@ public class BattleCalculator : MonoBehaviour
             enemyHitRate -= 20;
         }
 
-
-
+        //戻り値に計算した値を設定
+        battleParameterDTO.unitHitRate = unitHitRate;
         battleParameterDTO.enemyHitRate = enemyHitRate;
 
         battleParameterDTO.unitWeapon = unitWeapon;
         battleParameterDTO.enemyWeapon = enemy.equipWeapon;
 
-        battleParameterDTO.unitAttack = unitAttack;
-        battleParameterDTO.unitHitRate = unitHitRate;
-
-
-        //ここで3すくみ補正を含めた攻撃力、命中率の補正 色々変わるからDTO渡す
+        
+        
+        //3すくみ補正を含めた攻撃力、命中率の補正
         battleParameterDTO.affinity = BattleWeaponAffinity.EQUAL;
         if (enemy.equipWeapon != null)
         {
@@ -529,7 +543,7 @@ public class BattleCalculator : MonoBehaviour
         unitCriticalRate = (unitDex + unitLuk) / 2 + unitWeapon.criticalRate - enemyLuk;
 
         //210226 スキル「蒐集家」反映
-        if (skillManager.isCollector(unit)) {
+        if (SkillUtil.isCollector(unit)) {
             unitCriticalRate += 10;
 
         }
@@ -558,7 +572,7 @@ public class BattleCalculator : MonoBehaviour
             enemyCriticalRate = (enemyDex + enemyLuk) / 2 + enemy.equipWeapon.criticalRate - unitLuk;
 
             //敵の「蒐集家」判定
-            if (skillManager.isCollector(enemy))
+            if (SkillUtil.isCollector(enemy))
             {
                 enemyCriticalRate += 10;
             }
@@ -756,7 +770,7 @@ public class BattleCalculator : MonoBehaviour
     }
 
     //武器の相性による命中率補正
-    //まだ熟練度による命中率攻撃力補正入れてない
+    //TODO 熟練度による命中率攻撃力補正をここに入れる
     public BattleParameterDTO getWeaponAffinity(BattleParameterDTO battleParameterDTO )
     {
         //プレイヤー側がショットの時
@@ -801,7 +815,7 @@ public class BattleCalculator : MonoBehaviour
             }
             else
             {
-                //相性互角なら何もしない→ここで100%以上を100%にまるめる
+                //相性互角なら補正無しだが、0～100%の間への訂正を行う
                 unitHitRate = CorrectParameter(unitHitRate);
                 battleParameterDTO.unitHitRate = unitHitRate;
 
@@ -814,10 +828,10 @@ public class BattleCalculator : MonoBehaviour
                 battleParameterDTO.enemyAttack = enemyAttack;
                 return battleParameterDTO;
             }
-        //ユニットの武器がレーザーの時
+        
         }else if (battleParameterDTO.unitWeapon.type == WeaponType.LASER)
         {
-            
+            //ユニットの武器がレーザー
             //敵がショットで相性有利の時
             if (battleParameterDTO.enemyWeapon.type == WeaponType.SHOT)
             {
@@ -837,7 +851,7 @@ public class BattleCalculator : MonoBehaviour
 
                 return battleParameterDTO;
             }
-            //敵がストライクで相性不利
+            //敵が物理で相性不利
             else if (battleParameterDTO.enemyWeapon.type == WeaponType.STRIKE)
             {
                 //命中率、攻撃力に補正
@@ -875,6 +889,7 @@ public class BattleCalculator : MonoBehaviour
         }
         else if (battleParameterDTO.unitWeapon.type == WeaponType.STRIKE)
         {
+            //ユニットの武器が物理
             if (battleParameterDTO.enemyWeapon.type == WeaponType.LASER)
             {
                 //命中率、攻撃力に補正

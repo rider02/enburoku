@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System.Collections.Generic;
 
 /// <summary>
 /// 各ユニットのクラス
@@ -27,6 +25,7 @@ public class Unit
     //レベル
     public int lv;
 
+    //経験値
     public int exp;
 
     //HP
@@ -46,16 +45,16 @@ public class Unit
     public int ldef;
     public int cdef;
 
-    //210217 ユニットの移動力はクラス依存だが、ステータスアップ用に作った
+    //210217 ユニットの移動力はクラス依存だが、ステータスアップアイテム用に作った
     public int movePlus = 0;
 
-    //200827 DictionaryをScriptableObject化出来ないのでこう。
+    //200827 DictionaryをScriptableObject化出来ないので個別に保持
     public SkillLevel shotLevel;
     public SkillLevel laserLevel;
     public SkillLevel strikeLevel;
     public SkillLevel healLevel;
 
-    //210218 やっと技能レベルを実装する
+    //210218 技能レベル実装
     public int shotExp { get; set; }
     public int laserExp { get; set; }
 
@@ -72,6 +71,7 @@ public class Unit
     //スキルレベル
     public Dictionary<WeaponType, SkillLevel> skillLevelMap;
 
+    //装備武器
     public Weapon equipWeapon;
 
     //210216 回復の杖 武器と別に存在する
@@ -185,7 +185,7 @@ public class Unit
         if (hp >= maxHp) hp = maxHp;
     }
 
-    //死んだかどうか返すだけ
+    //死んだかどうか返す
     public bool isDead()
     {
         return (hp <= 0);

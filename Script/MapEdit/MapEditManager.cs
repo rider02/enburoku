@@ -7,6 +7,7 @@ using UnityEngine.UI;
 using System;
 
 /// <summary>
+/// 戦闘マップエディタ
 /// 210302 BattleMapManagerの中に有ったので編集機能は分割した
 /// </summary>
 public class MapEditManager : MonoBehaviour

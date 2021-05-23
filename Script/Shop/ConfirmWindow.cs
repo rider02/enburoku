@@ -1,22 +1,16 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
-//購入確認ウィンドウ
+//お店の購入確認ウィンドウUI制御クラス
 public class ConfirmWindow : MonoBehaviour
 {
-    [SerializeField]
-    Text weaponName;
-
-    [SerializeField]
-    Text endurance;
-
-    [SerializeField]
-    Text price;
+    [SerializeField] Text weaponName;   //武器名
+    [SerializeField] Text endurance;    //使用回数
+    [SerializeField] Text price;        //値段
 
     ShopManager shopManager;
 
+    //初期化メソッド
     public void init(ShopManager shopManager)
     {
         this.shopManager = shopManager;
@@ -34,6 +28,7 @@ public class ConfirmWindow : MonoBehaviour
         this.price.text = weapon.price.ToString();
     }
 
+    //購入
     public void buy()
     {
         //ウィンドウに表示している金額で購入処理

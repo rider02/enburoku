@@ -4,12 +4,13 @@ using UnityEngine;
 using System.Linq;
 using System;
 
+//戦闘マップのクラス
 public class Main_Map : MonoBehaviour
 {
     [SerializeField]
     Main_Cell mainCell;
     
-    //ユニットを格納しておいて検索用に使う
+    //PlayerModel、EnemyModelを格納しておいて検索用に使う
     [SerializeField]
     Transform unitContainer;
     
@@ -21,11 +22,10 @@ public class Main_Map : MonoBehaviour
 
     List<Main_Cell> cells = new List<Main_Cell>();
 
-    //200808 ユニット移動用にユニット名を保存しておく
+    //200808 現在選択されているユニットの名前
     public string activeUnitName;
-
     public string activeEnemyName;
-    public int activeEnemyid;
+    public int activeEnemyid;   //現在選択されている敵ID
 
 
     /// <summary>
@@ -34,7 +34,6 @@ public class Main_Map : MonoBehaviour
     /// <value>The active unit.</value>
     public PlayerModel ActiveUnit
     {
-        //200725 これ、最初のユニットを返してるだけだから複数ユニットにすると動かない
         get{ return unitContainer.GetComponentsInChildren<PlayerModel>().FirstOrDefault(unit => unit.unit.name.Equals(activeUnitName)); }
     }
 
@@ -52,59 +51,7 @@ public class Main_Map : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// マップを生成します
-    /// </summary>
-    /// <param name="width">Width.</param>
-    /// <param name="height">Height.</param>
-    public void Generate(int width, int height)
-    {
-        foreach (var cell in cells)
-        {
-            //TODO リスト内の全てのセルを初期化　???　
-            Destroy(cell.gameObject);
-        }
-
-        for (var y = 0; y < height; y++)
-        {
-            for (var x = 0; x < width; x++)
-            {
-                Main_Cell cell;
-                //1～10の乱数でマップを生成
-                //TODO 2次元配列でマップを実装出来るようにする
-                var rand = UnityEngine.Random.Range(0, 10);
-
-                //0～7の時は普通のフィールド
-                if (rand <= 5)
-                {
-                    cell = Instantiate(mainCell);
-                    cell.SetType(CellType.Field);
-
-                }
-                else if (rand >=6 && rand <= 8)
-                {
-                    //1、2の時は茂み
-                    cell = Instantiate(mainCell);
-                    cell.SetType(CellType.Tree);
-                }
-                else
-                {
-                    //壁
-                    cell = Instantiate(mainCell);
-                    cell.SetType(CellType.Block);
-                }
-                //セルを表示
-                cell.gameObject.SetActive(true);
-                //cellの配下にオブジェクトが生成されるようになる
-                cell.transform.SetParent(transform);
-                //セルのxとyを設定
-                cell.SetCoordinate(x, y, cell.Type);
-                cells.Add(cell);
-            }
-        }
-    }
-
-
+    
 
     /// <summary>
     /// 移動可能なマスをハイライトします
@@ -152,12 +99,24 @@ public class Main_Map : MonoBehaviour
         }
     }
 
-    //210212 敵専用移動可能セルを表示しながら、攻撃可能かどうかを判定
+    /// <summary>
+    /// 敵関連
+    /// </summary>
+
+    /// <summary>
+    /// 210212 敵専用移動可能セルを表示しながら、攻撃可能かどうかを判定
+    /// </summary>
+    /// <param name="x">X座標</param>
+    /// <param name="y">Y座標</param>
+    /// <param name="moveAmount">移動力</param>
+    /// <param name="weapon">武器</param>
+    /// <param name="isWarning">警戒範囲表示モード(紫表示)か</param>
+    /// <param name="enemyId">敵のID</param>
+    /// <returns></returns>
     public List<DestinationAndAttackDto> HighlightEnemyMovableCells(int x, int y, int moveAmount, Weapon weapon, bool isWarning, int enemyId)
     {
         //まず移動可能なセルのハイライトを消す
         ResetMovableCells();
-
 
         //200724 渡された座標が最初のセルとなる
         //FirstはNullが返って来ない物に使うこと
@@ -204,7 +163,7 @@ public class Main_Map : MonoBehaviour
             }
 
             //それぞれの移動可能なセルに対して攻撃可能なセルを確認
-            DestinationAndAttackDto destinationAndAttackDto = getAttackableCells(info.coordinate.x, info.coordinate.y, weapon, enemyId);
+            DestinationAndAttackDto destinationAndAttackDto = GetAttackableCells(info.coordinate.x, info.coordinate.y, weapon, enemyId);
 
             if(destinationAndAttackDto != null)
             {
@@ -218,7 +177,55 @@ public class Main_Map : MonoBehaviour
         return attackableCellList;
     }
 
+    //210211 敵が攻撃可能なセルを取得
+    private DestinationAndAttackDto GetAttackableCells(int x, int y, Weapon weapon, int enemyId)
+    {
+        //現在のセルを取得
+        var startCell = cells.First(c => c.X == x && c.Y == y);
+
+        DestinationAndAttackDto destinationAndAttackDto = null;
+
+        //現在のセル攻撃可能範囲 取得 第三引数 : 攻撃時なので、敵のセルを選択可能
+        foreach (var info in GetAttackRenge(startCell, weapon.range, weapon.isCloseAttack))
+        {
+            //Debug.Log($"プレイヤーを攻撃出来るか確認するセル : X={info.coordinate.x}, Y={info.coordinate.y}");
+
+            //210219 攻撃可能セルの色を赤色にする
+            var attackableCell = cells.First(c => c.X == info.coordinate.x && c.Y == info.coordinate.y);
+            //セルが存在して移動可能でなければ(移動可能なセルは赤色にしない)
+            if (attackableCell != null && attackableCell.IsMovable == false)
+            {
+
+                attackableCell.IsAttackable = true;
+
+            }
+
+            //攻撃可能なユニットが存在するか確認
+            PlayerModel destinationUnit = unitContainer.GetComponentsInChildren<PlayerModel>().FirstOrDefault(
+                c => c.x == info.coordinate.x && c.z == info.coordinate.y);
+
+            //移動可能範囲に攻撃可能なユニットが居れば
+            if (destinationUnit != null)
+            {
+                Debug.Log($"攻撃可能な座標 :X = {startCell.X} , Y = {startCell.Y} ");
+                Debug.Log("攻撃対象 : " + destinationUnit.unit.name);
+
+                //攻撃可能なセルを返す
+                //攻撃可能な座標をセット
+                destinationAndAttackDto = new DestinationAndAttackDto(x, y);
+
+                //攻撃対象のセルをセット
+                Coordinate attackCoordinate = new Coordinate(info.coordinate.x, info.coordinate.y);
+                destinationAndAttackDto.AttackCoordinate = attackCoordinate;
+
+            }
+        }
+        //移動可能範囲に攻撃可能なユニットが居ない場合はnullが返ってくる
+        return destinationAndAttackDto;
+    }
+
     /// <summary>
+    /// 自軍ターン時の敵の攻撃可能セル確認(紫表示)表示を行う
     /// 210304 警告処理を軽くする為にメソッドを分けた
     /// </summary>
     /// <param name="x"></param>
@@ -264,84 +271,11 @@ public class Main_Map : MonoBehaviour
             }
 
             //それぞれの移動可能なセルに対して攻撃可能なセルを確認
-            List<Main_Cell> attackableCellList = getWarnAttackableCells(info.coordinate.x, info.coordinate.y, weapon, enemyId);
+            List<Main_Cell> attackableCellList = GetWarnAttackableCells(info.coordinate.x, info.coordinate.y, weapon, enemyId);
             warnCellList.AddRange(attackableCellList);
         }
 
         return warnCellList;
-    }
-
-    //210211 攻撃可能範囲表示
-    public void HighlightAttacableCells(int x, int y, Weapon weapon)
-    {
-        //まずセルのハイライトを消す
-        ResetMovableCells();
-        var startCell = cells.First(c => c.X == x && c.Y == y);
-
-        //攻撃可能範囲取得 第三引数 : 攻撃時なので、敵のセルを選択可能
-        foreach (var info in GetAttackRenge(startCell, weapon.range, weapon.isCloseAttack))
-        {
-            //攻撃可能にしていく trueになるとハイライトが赤になる
-            Main_Cell cell = cells.First(c => c.X == info.coordinate.x && c.Y == info.coordinate.y);
-
-            //210219 武器の時は赤色、そうでない時は緑色にする
-            if (weapon.type != WeaponType.HEAL)
-            {
-                cell.IsAttackable = true;
-            }
-            else
-            {
-                cell.IsHealable = true;
-            }
-        }
-
-    }
-
-    //210211 敵が攻撃可能なセルを取得
-    private DestinationAndAttackDto getAttackableCells(int x, int y, Weapon weapon, int enemyId)
-    {
-        //現在のセルを取得
-        var startCell = cells.First(c => c.X == x && c.Y == y);
-
-        DestinationAndAttackDto destinationAndAttackDto = null;
-
-        //現在のセル攻撃可能範囲 取得 第三引数 : 攻撃時なので、敵のセルを選択可能
-        foreach (var info in GetAttackRenge(startCell, weapon.range, weapon.isCloseAttack))
-        {
-            //Debug.Log($"プレイヤーを攻撃出来るか確認するセル : X={info.coordinate.x}, Y={info.coordinate.y}");
-
-            //210219 攻撃可能セルの色を変えてみる
-            var attackableCell = cells.First(c => c.X == info.coordinate.x && c.Y == info.coordinate.y);
-            //セルが存在して移動可能でなければ(移動可能なセルは赤色にしない)
-            if (attackableCell != null && attackableCell.IsMovable == false)
-            {
-
-                attackableCell.IsAttackable = true;
-                
-            }
-
-            //攻撃可能なユニットが存在するか確認
-            PlayerModel destinationUnit = unitContainer.GetComponentsInChildren<PlayerModel>().FirstOrDefault(
-                c => c.x == info.coordinate.x && c.z == info.coordinate.y);
-
-            //移動可能範囲に攻撃可能なユニットが居れば
-            if (destinationUnit != null)
-            {
-                Debug.Log($"攻撃可能な座標 :X = {startCell.X} , Y = {startCell.Y} ");
-                Debug.Log("攻撃対象 : " + destinationUnit.unit.name);
-
-                //攻撃可能なセルを返す
-                //攻撃可能な座標をセット
-                destinationAndAttackDto = new DestinationAndAttackDto(x, y);
-
-                //攻撃対象のセルをセット
-                Coordinate attackCoordinate = new Coordinate(info.coordinate.x, info.coordinate.y);
-                destinationAndAttackDto.AttackCoordinate = attackCoordinate;
-                
-            }
-        }
-        //移動可能範囲に攻撃可能なユニットが居ない場合はnullが返ってくる
-        return destinationAndAttackDto;
     }
 
     /// <summary>
@@ -353,7 +287,7 @@ public class Main_Map : MonoBehaviour
     /// <param name="isWarning"></param>
     /// <param name="enemyId"></param>
     /// <returns></returns>
-    private List<Main_Cell> getWarnAttackableCells(int x, int y, Weapon weapon, int enemyId)
+    private List<Main_Cell> GetWarnAttackableCells(int x, int y, Weapon weapon, int enemyId)
     {
         //現在のセルを取得
         var startCell = cells.First(c => c.X == x && c.Y == y);
@@ -371,197 +305,9 @@ public class Main_Map : MonoBehaviour
                 attackableCell.SetIsWarning(enemyId);
                 attackableCells.Add(attackableCell);
             }
-
-
         }
         //移動可能範囲に攻撃可能なユニットが居ない場合はnullが返ってくる
         return attackableCells;
-    }
-
-    /// <summary>
-    /// 移動可能なマスのハイライトを消します
-    /// </summary>
-    public void ResetMovableCells()
-    {
-        //リストから移動可能な物を全て取得して移動不可にしていく Whereって何？
-        foreach (var cell in cells.Where(c => c.IsMovable))
-        {
-            cell.IsMovable = false;
-        }
-    }
-
-    /// <summary>
-    /// 攻撃可能、回復可能なセルを消す
-    /// </summary>
-    public void ResetAttackableCells()
-    {
-        //リストから移動可能な物を全て取得して移動不可にしていく Whereって何？
-        foreach (var cell in cells.Where(c => c.IsAttackable))
-        {
-            cell.IsAttackable = false;
-        }
-        foreach (var cell in cells.Where(c => c.IsHealable))
-        {
-            cell.IsHealable = false;
-        }
-    }
-
-    /// <summary>
-    /// 210221 敵のIdをセルから除去する
-    /// </summary>
-    /// <param name="id"></param>
-    public void RemoveWarningCells(int enemyId)
-    {
-        foreach (var cell in cells.Where(c => c.IsWarning))
-        {
-            //セルのハイライトした敵リストから引数の敵を除去
-            //全て空にならなければハイライトは消えない
-            cell.RemoveIsWarning(enemyId);
-        }
-    }
-
-    /// <summary>
-    /// 210221 警戒範囲セルを全て消す 主に自軍のターンエンド時実行
-    /// </summary>
-    public void ResetWarningCells()
-    {
-        foreach (var cell in cells.Where(c => c.IsWarning))
-        {
-            //セルの警戒範囲を全て消して、表示した敵ユニットのIDを空にする
-            cell.IsWarning = false;
-            cell.highLightEnemyidSet.Clear();
-        }
-
-        //全ての敵ユニットのハイライトフラグを切る
-        foreach (EnemyModel enemyModel in enemyContainer.GetComponentsInChildren<EnemyModel>())
-        {
-            enemyModel.isHighLight = false;
-            enemyModel.attackableCellList.Clear();
-            enemyModel.isCancelReload = false;
-        }
-    }
-
-    /// <summary>
-    /// 210221 自軍ターンで味方が動いた時などに呼んで、敵の攻撃予測範囲を再計算する
-    /// </summary>
-    public void ReloadHighLightCells(PlayerModel playerModel)
-    {
-        bool isReload = false;
-        foreach (EnemyModel enemyModel in enemyContainer.GetComponentsInChildren<EnemyModel>())
-        {
-            //既にハイライト済みの敵のみが対象 ハイライトしてなければ関係無いので
-            if (enemyModel.isHighLight)
-            {
-                //攻撃範囲にユニットが居る敵のみ範囲再計算
-                foreach(Main_Cell warnCell in enemyModel.attackableCellList){
-                    if(warnCell.X == playerModel.x && warnCell.Y == playerModel.z)
-                    {
-                        //1人でも攻撃範囲にユニットが居れば再計算は確定するのでbreak
-                        isReload = true;
-                        //再計算フラグ
-                        enemyModel.isCancelReload = true;
-                        break;
-                    }
-                }
-
-                if (isReload)
-                {
-                    Debug.Log($"攻撃範囲にユニットが存在するので再計算:{enemyModel.enemy.name}");
-                    //一度消さないと無限に増え続けてしまう
-                    RemoveWarningCells(enemyModel.enemyId);
-
-                    //再表示
-                    enemyModel.HighLightWarningCells();
-                }
-            }
-        }
-    }
-
-    //ユニットが移動をキャンセルした場合に再計算
-    public void CancelReloadHighLightCells()
-    {
-        foreach (EnemyModel enemyModel in enemyContainer.GetComponentsInChildren<EnemyModel>())
-        {
-            //キャンセル時再計算フラグが立っている敵が対象
-            if (enemyModel.isCancelReload)
-            {
-
-                RemoveWarningCells(enemyModel.enemyId);
-
-                //再表示
-                enemyModel.HighLightWarningCells();
-                enemyModel.isCancelReload = false;
-            }
-        }
-    }
-
-    /// <summary>
-    /// 移動経路となるマスを返します
-    /// </summary>
-    /// <returns>The route cells.</returns>
-    /// <param name="startCell">Start cell.</param>
-    /// <param name="moveAmount">Move amount.</param>
-    /// <param name="endCell">End cell.</param>
-    /// //endCellは移動先のセルらしい
-    public Main_Cell[] CalculateRouteCells(int x, int y, int moveAmount, Main_Cell endCell , CalculationMode mode)
-    {
-        //x,yを元に移動開始するセルを取得
-        var startCell = cells.First(c => c.X == x && c.Y == y);
-
-        //移動可能となるセルリストがMoveAmountInfo型で返ってくる
-        var moveAbleInfos = GetRemainingMoveAmountInfos(startCell, moveAmount, mode);
-
-        //移動先セルの座標？使ってない
-        //var endCellMoveAmountInfo = infos.First(info => info.coordinate.x == endCell.X && info.coordinate.y == endCell.Y);
-        //移動経路のセルリスト作る
-        List<Main_Cell> routeCells = new List<Main_Cell>();
-
-        Debug.Log($"移動経路計算モード =  {mode}");
-
-        //攻撃モードと探索モードだと検索方法が違う
-        if (mode == CalculationMode.ENEMY_MOVE || mode == CalculationMode.PLAYER_MOVE)
-        {
-            Debug.Log("移動先への最短距離を検索");
-            //Anyって何？ 移動可能リストにクリックした移動先のセルが入ってなかったらおかしいのでエラー
-            if (!moveAbleInfos.Any(info => info.coordinate.x == endCell.X && info.coordinate.y == endCell.Y))
-            {
-                Debug.Log(string.Format("endCell(x:{0}, y:{1}) is not movable.", endCell.X, endCell.Y));
-                throw new ArgumentException(string.Format("endCell(x:{0}, y:{1}) is not movable.", endCell.X, endCell.Y));
-            }
-
-            //まず最終移動先セルを追加
-            routeCells.Add(endCell);
-            //無限ループ
-            while (true)
-            {
-                //まず最終移動先セルの情報から開始 配列は0スタートでCountは要素数を返すので-1する
-                var currentCellInfo = moveAbleInfos.First(moveAbleInfo => moveAbleInfo.coordinate.x == routeCells[routeCells.Count - 1].X && moveAbleInfo.coordinate.y == routeCells[routeCells.Count - 1].Y);
-
-                //現在のセルを現在のセル情報(MoveAmountInfo)から取得する
-                var currentCell = cells.First(cell => cell.X == currentCellInfo.coordinate.x && cell.Y == currentCellInfo.coordinate.y);
-
-                //1つ前のセルの移動力を算出 当然0から始まる
-                var previousMoveAmount = currentCellInfo.amount + currentCell.Cost;
-
-                //1つ前のセルの中から、移動力が同じ物を探す
-                //ABS : 絶対値を返すので、X方向、Y方向だろうが1なら隣接しているセルとなる
-                var previousCellInfo = moveAbleInfos.FirstOrDefault(moveAbleInfo => (Mathf.Abs(moveAbleInfo.coordinate.x - currentCell.X) + Mathf.Abs(moveAbleInfo.coordinate.y - currentCell.Y)) == 1 && moveAbleInfo.amount == previousMoveAmount);
-
-                //最終的にはプレイヤーが今居る座標の移動力になり、最大移動力以上のセルは存在しないのでnullとなる
-                if (null == previousCellInfo)
-                {
-                    break;
-                }
-                //移動経路リストに最短経路を追加する
-                routeCells.Add(cells.First(c => c.X == previousCellInfo.coordinate.x && c.Y == previousCellInfo.coordinate.y));
-            }
-        }
-
-            //最終目的地から追加していってるので順番を逆にする
-            routeCells.Reverse();
-
-        //配列で返す
-        return routeCells.ToArray();
     }
 
     //210214 最もプレイヤーに近いセルを返す
@@ -653,11 +399,229 @@ public class Main_Map : MonoBehaviour
     }
 
     /// <summary>
+    /// 210221 自軍ターンで味方が動いた時などに呼んで、敵の攻撃予測範囲を再計算する
+    /// </summary>
+    public void ReloadHighLightCells(PlayerModel playerModel)
+    {
+        bool isReload = false;
+        foreach (EnemyModel enemyModel in enemyContainer.GetComponentsInChildren<EnemyModel>())
+        {
+            //既にハイライト済みの敵のみが対象 ハイライトしてなければ関係無いので処理しない
+            if (enemyModel.isHighLight)
+            {
+                //攻撃範囲にユニットが居る敵のみ範囲再計算
+                foreach (Main_Cell warnCell in enemyModel.attackableCellList)
+                {
+                    if (warnCell.X == playerModel.x && warnCell.Y == playerModel.z)
+                    {
+                        //1人でも攻撃範囲にユニットが居れば再計算は確定するのでbreak
+                        isReload = true;
+                        //再計算フラグ
+                        enemyModel.isCancelReload = true;
+                        break;
+                    }
+                }
+
+                if (isReload)
+                {
+                    Debug.Log($"攻撃範囲にユニットが存在するので再計算:{enemyModel.enemy.name}");
+                    //一度消さないと無限に増え続けてしまう
+                    RemoveWarningCells(enemyModel.enemyId);
+
+                    //再表示
+                    enemyModel.HighLightWarningCells();
+                }
+            }
+        }
+    }
+
+    //ユニットが移動をキャンセルした場合に再計算
+    public void CancelReloadHighLightCells()
+    {
+        foreach (EnemyModel enemyModel in enemyContainer.GetComponentsInChildren<EnemyModel>())
+        {
+            //キャンセル時再計算フラグが立っている敵が対象
+            if (enemyModel.isCancelReload)
+            {
+
+                RemoveWarningCells(enemyModel.enemyId);
+
+                //再表示
+                enemyModel.HighLightWarningCells();
+                enemyModel.isCancelReload = false;
+            }
+        }
+    }
+
+    /// <summary>
+    /// プレイヤー関連
+    /// </summary>
+
+    //210211 プレイヤーの攻撃可能範囲表示
+    public void HighlightAttacableCells(int x, int y, Weapon weapon)
+    {
+        //まずセルのハイライトを消す
+        ResetMovableCells();
+        var startCell = cells.First(c => c.X == x && c.Y == y);
+
+        //攻撃可能範囲取得 第三引数 : 攻撃時なので、敵のセルを選択可能
+        foreach (var info in GetAttackRenge(startCell, weapon.range, weapon.isCloseAttack))
+        {
+            //攻撃可能にしていく trueになるとハイライトが赤になる
+            Main_Cell cell = cells.First(c => c.X == info.coordinate.x && c.Y == info.coordinate.y);
+
+            //210219 武器の時は赤色、そうでない時は緑色にする
+            if (weapon.type != WeaponType.HEAL)
+            {
+                cell.IsAttackable = true;
+            }
+            else
+            {
+                cell.IsHealable = true;
+            }
+        }
+
+    }
+
+    /// <summary>
+    /// 移動可能なマスのハイライトを消す
+    /// </summary>
+    public void ResetMovableCells()
+    {
+        //リストから移動可能な物を全て取得して移動不可にしていく
+        foreach (var cell in cells.Where(c => c.IsMovable))
+        {
+            cell.IsMovable = false;
+        }
+    }
+
+    /// <summary>
+    /// 攻撃可能、回復可能なセルを消す
+    /// </summary>
+    public void ResetAttackableCells()
+    {
+        //リストから移動可能な物を全て取得して移動不可にしていく
+        foreach (var cell in cells.Where(c => c.IsAttackable))
+        {
+            cell.IsAttackable = false;
+        }
+        foreach (var cell in cells.Where(c => c.IsHealable))
+        {
+            cell.IsHealable = false;
+        }
+    }
+
+    /// <summary>
+    /// 210221 敵のIdをセルから除去する
+    /// </summary>
+    /// <param name="id"></param>
+    public void RemoveWarningCells(int enemyId)
+    {
+        foreach (var cell in cells.Where(c => c.IsWarning))
+        {
+            //セルのハイライトした敵リストから引数の敵を除去
+            //全て空にならなければ誰かの攻撃可能範囲なので、警告ハイライト(紫)は消えない
+            cell.RemoveIsWarning(enemyId);
+        }
+    }
+
+    /// <summary>
+    /// 210221 警戒範囲セルを全て消す 主に自軍のターンエンド時実行
+    /// </summary>
+    public void ResetWarningCells()
+    {
+        foreach (var cell in cells.Where(c => c.IsWarning))
+        {
+            //セルの警戒範囲を全て消して、表示した敵ユニットのIDを空にする
+            cell.IsWarning = false;
+            cell.highLightEnemyidSet.Clear();
+        }
+
+        //全ての敵ユニットのハイライトフラグを切る
+        foreach (EnemyModel enemyModel in enemyContainer.GetComponentsInChildren<EnemyModel>())
+        {
+            enemyModel.isHighLight = false;
+            enemyModel.attackableCellList.Clear();
+            enemyModel.isCancelReload = false;
+        }
+    }
+
+
+
+    /// <summary>
+    /// 移動経路となるマスを返します
+    /// </summary>
+    /// <returns>The route cells.</returns>
+    /// <param name="startCell">Start cell.</param>
+    /// <param name="moveAmount">Move amount.</param>
+    /// <param name="endCell">End cell.</param>
+    /// //endCellは移動先のセルらしい
+    public Main_Cell[] CalculateRouteCells(int x, int y, int moveAmount, Main_Cell endCell , CalculationMode mode)
+    {
+        //x,yを元に移動開始するセルを取得
+        var startCell = cells.First(c => c.X == x && c.Y == y);
+
+        //移動可能となるセルリストがMoveAmountInfo型で返ってくる
+        var moveAbleInfos = GetRemainingMoveAmountInfos(startCell, moveAmount, mode);
+
+        //移動経路のセルリスト作る
+        List<Main_Cell> routeCells = new List<Main_Cell>();
+
+        Debug.Log($"移動経路計算モード =  {mode}");
+
+        //攻撃モードと探索モードだと検索方法が違う
+        if (mode == CalculationMode.ENEMY_MOVE || mode == CalculationMode.PLAYER_MOVE)
+        {
+            Debug.Log("移動先への最短距離を検索");
+            //移動可能リストにクリックした移動先のセルが入ってなかったらおかしいのでエラー
+            if (!moveAbleInfos.Any(info => info.coordinate.x == endCell.X && info.coordinate.y == endCell.Y))
+            {
+                Debug.Log(string.Format("endCell(x:{0}, y:{1}) is not movable.", endCell.X, endCell.Y));
+                throw new ArgumentException(string.Format("endCell(x:{0}, y:{1}) is not movable.", endCell.X, endCell.Y));
+            }
+
+            //まず最終移動先セルを追加
+            routeCells.Add(endCell);
+            //無限ループ
+            while (true)
+            {
+                //まず最終移動先セルの情報から開始 配列は0スタートでCountは要素数を返すので-1する
+                var currentCellInfo = moveAbleInfos.First(moveAbleInfo => moveAbleInfo.coordinate.x == routeCells[routeCells.Count - 1].X && moveAbleInfo.coordinate.y == routeCells[routeCells.Count - 1].Y);
+
+                //現在のセルを現在のセル情報(MoveAmountInfo)から取得する
+                var currentCell = cells.First(cell => cell.X == currentCellInfo.coordinate.x && cell.Y == currentCellInfo.coordinate.y);
+
+                //1つ前のセルの移動力を算出 当然0から始まる
+                var previousMoveAmount = currentCellInfo.amount + currentCell.Cost;
+
+                //1つ前のセルの中から、移動力が同じ物を探す
+                //ABS : 絶対値を返すので、X方向、Y方向だろうが1なら隣接しているセルとなる
+                var previousCellInfo = moveAbleInfos.FirstOrDefault(moveAbleInfo => (Mathf.Abs(moveAbleInfo.coordinate.x - currentCell.X) + Mathf.Abs(moveAbleInfo.coordinate.y - currentCell.Y)) == 1 && moveAbleInfo.amount == previousMoveAmount);
+
+                //最終的にはプレイヤーが今居る座標の移動力になり、最大移動力以上のセルは存在しないのでnullとなる
+                if (null == previousCellInfo)
+                {
+                    break;
+                }
+                //移動経路リストに最短経路を追加する
+                routeCells.Add(cells.First(c => c.X == previousCellInfo.coordinate.x && c.Y == previousCellInfo.coordinate.y));
+            }
+        }
+
+            //最終目的地から追加していってるので順番を逆にする
+            routeCells.Reverse();
+
+        //配列で返す
+        return routeCells.ToArray();
+    }
+
+
+    /// <summary>
     /// 210301 主に移動不可判定に使用 移動先に宝箱があるかを返す
     /// </summary>
     /// <param name="moveAbleInfo"></param>
     /// <returns></returns>
-    private bool isDestinationTreasureExist(Coordinate coordinate)
+    private bool IsDestinationTreasureExist(Coordinate coordinate)
     {
         //移動先に自分以外の敵が存在するか判定
         TreasureModel destinationTreasure = treasureContainer.GetComponentsInChildren<TreasureModel>().FirstOrDefault(
@@ -768,7 +732,7 @@ public class Main_Map : MonoBehaviour
                     }
 
                     //移動先に宝箱がある場合、敵、味方共に移動不可
-                    if (isDestinationTreasureExist(aroundCellCoordinate))
+                    if (IsDestinationTreasureExist(aroundCellCoordinate))
                     {
                         continue;
                     }
@@ -885,7 +849,7 @@ public class Main_Map : MonoBehaviour
     }
 
     /// <summary>
-    /// 210301 周囲に回復出来る敵が居るかを返す
+    /// 210301 周囲に回復出来るユニットが居るかを返す
     /// </summary>
     /// <param name="startCell"></param>
     /// <returns></returns>
@@ -1074,7 +1038,6 @@ public class Main_Map : MonoBehaviour
             infos.AddRange(appendInfos);
         }
 
-        //ここまで処理が入れば攻撃可能範囲内に敵は存在しない
         return attackableEnemyList;
     }
 
@@ -1132,7 +1095,7 @@ public class Main_Map : MonoBehaviour
     /// <param name="x"></param>
     /// <param name="y"></param>
     /// <returns></returns>
-    public bool isTreasureExist(Main_Cell cell)
+    public bool IsTreasureExist(Main_Cell cell)
     {
         if(cell == null)
         {
@@ -1184,6 +1147,7 @@ public class Main_Map : MonoBehaviour
     /// </summary>
     public void SaveMap(Stage stage)
     {
+        //210522 実行ファイルにする場合はコメントアウト
         //MapDataCreator.Create(cells, stage);
 
     }
@@ -1202,7 +1166,7 @@ public class Main_Map : MonoBehaviour
         }
         foreach (var cell in cells)
         {
-            //TODO リスト内の全てのセルを初期化　???　
+            //リスト内の全てのセルを初期化
             Destroy(cell.gameObject);
         }
         cells = new List<Main_Cell>();
@@ -1244,4 +1208,59 @@ public class Main_Map : MonoBehaviour
             this.amount = amount;
         }
     }
+
+    /// <summary>
+    /// マップ自動精製
+    /// 210522 ロードするようになったので、初回のマップ精製時のみ使用
+    /// </summary>
+    /// <param name="width">Width.</param>
+    /// <param name="height">Height.</param>
+    public void Generate(int width, int height)
+    {
+        foreach (var cell in cells)
+        {
+            //リスト内の全てのセルを初期化
+            Destroy(cell.gameObject);
+        }
+
+        for (var y = 0; y < height; y++)
+        {
+            for (var x = 0; x < width; x++)
+            {
+                Main_Cell cell;
+                //1～10の乱数でマップを生成
+                //TODO 2次元配列でマップを実装出来るようにする
+                var rand = UnityEngine.Random.Range(0, 10);
+
+                //0～7の時は普通のフィールド
+                if (rand <= 5)
+                {
+                    cell = Instantiate(mainCell);
+                    cell.SetType(CellType.Field);
+
+                }
+                else if (rand >= 6 && rand <= 8)
+                {
+                    //1、2の時は茂み
+                    cell = Instantiate(mainCell);
+                    cell.SetType(CellType.Tree);
+                }
+                else
+                {
+                    //壁
+                    cell = Instantiate(mainCell);
+                    cell.SetType(CellType.Block);
+                }
+                //セルを表示
+                cell.gameObject.SetActive(true);
+                //cellの配下にオブジェクトが生成されるようになる
+                cell.transform.SetParent(transform);
+                //セルのxとyを設定
+                cell.SetCoordinate(x, y, cell.Type);
+                cells.Add(cell);
+            }
+        }
+    }
+
 }
+

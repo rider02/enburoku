@@ -4,7 +4,7 @@ using System.Linq;
 
 
 /// <summary>
-/// ユニット成長率のクラス
+/// ユニット成長率ScriptableObject精製用クラス
 /// </summary>
 public class GrowthDatabase : ScriptableObject
 {

@@ -10,7 +10,6 @@ using System.Reflection;
 public class SceneReader
 {
     private SceneController sceneController;
-    private Actions actions;
 
     //コンストラクタ
     public SceneReader(SceneController sceneController)
@@ -18,7 +17,6 @@ public class SceneReader
         //SceneController、actionsを参照させる
         this.sceneController = sceneController;
 
-        actions = sceneController.Actions;
     }
 
 
@@ -110,9 +108,7 @@ public class SceneReader
                 else if (line.Contains("method"))
                 {
                     line = line.Replace("method=", "");
-                    var type = actions.GetType();
-                    MethodInfo mi = type.GetMethod(line);
-                    mi.Invoke(actions, new object[] { });
+                    //未設定
                 }
                 //200616 背景画像変更 back=jinja
                 else if (line.Contains("back"))

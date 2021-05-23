@@ -1,10 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System.Collections.Generic;
 
 /// <summary>
 /// 各ジョブのクラス
 /// 転職先、成長率、スキル、ステータス補正値、装備可能武器を保持する
+/// JobDatabaseでアセット化して使用する
 /// </summary>
 [System.Serializable]
 public class Job

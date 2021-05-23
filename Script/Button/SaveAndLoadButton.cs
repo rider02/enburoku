@@ -1,10 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// セーブとロードの機能を持つボタン
+/// セーブ、ロード、データ削除の機能を持つボタン
 /// </summary>
 public class SaveAndLoadButton : MonoBehaviour
 {
@@ -95,12 +93,13 @@ public class SaveAndLoadButton : MonoBehaviour
         //章saveData.chapterでenumのIDを取得してString型に変換
         int chapterNam = (int)saveData.chapter;
 
-        //210512 10以上の章はレミリアルート 章追加したら訂正すること
+        //210512 10以上の章はレミリアルート 章追加したら10では合わなくなるので訂正すること
         if(chapterNam > 10){
             chapterNam = (int)saveData.chapter - 10;
         }
+
+        //章の名前
         chapterNamText.text = string.Format("第{0}章", chapterNam.ToString());
-        //章の名前 (int)
         chapterText.text = saveData.chapter.GetStringValue();
 
         //時間

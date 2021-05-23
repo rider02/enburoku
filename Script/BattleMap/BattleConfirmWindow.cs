@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
+/// 戦闘開始確認ウィンドウ
 /// 200216 機能は少ないが、テキストの更新の為作成
 /// </summary>
 public class BattleConfirmWindow : MonoBehaviour

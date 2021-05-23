@@ -2,6 +2,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
+/// <summary>
+/// “¹‹ï(Œ®“™)ScriptableObject¸»—pƒNƒ‰ƒX
+/// </summary>
 public class ToolDatabase : ScriptableObject
 {
 

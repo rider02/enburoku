@@ -1,7 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
+﻿/// <summary>
+/// 210521 戦闘の状態
+/// </summary>
 public enum BattleState
 {
     INIT,

@@ -1,10 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// バトル画面とかでユニットにフォーカスが当たった時きり変わるウィンドウ
+/// 210521 マップで敵にカーソルを合わせた時の簡易UI制御クラス
+/// EnemyOutlineWindowと同じ実装を行う
 /// </summary>
 public class UnitOutlineWindow : MonoBehaviour
 {

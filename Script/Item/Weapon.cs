@@ -1,32 +1,16 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-/// <summary>
+﻿/// <summary>
 /// 武器
 /// </summary>
 //System.Serializableを設定しないと、データを保持できない(シリアライズできない)ので注意
 [System.Serializable]
 public class Weapon
 {
-
-    //名前
-    public string name;
-
-    //種類
-    public WeaponType type;
-
-    //2回攻撃フラグ
-    public bool isYuusha;
-
-    //非売品(Not for sale)
-    public bool isNfs;
-
-    //攻撃力
-    public int attack;
-
-    //命中率
-    public int hitRate;
+    public string name;         //名前
+    public WeaponType type;     //種類
+    public bool isYuusha;       //2回攻撃フラグ
+    public bool isNfs;          //非売品(Not for sale)
+    public int attack;          //攻撃力
+    public int hitRate;         //命中率
 
     //必殺
     public int criticalRate;

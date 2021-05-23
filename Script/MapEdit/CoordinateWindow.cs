@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 座標を表示するウィンドウ デバッグ用？
+/// 座標を表示するウィンドウ デバッグ用
 /// </summary>
 public class CoordinateWindow : MonoBehaviour
 {

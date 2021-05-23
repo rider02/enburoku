@@ -7,15 +7,12 @@ using UnityEngine;
 /// </summary>
 public class ModeManager : MonoBehaviour
 {
-    public static Route route;
+    public static Route route;              //霊夢、レミリアルートのどちらか
+    public static Difficulty difficulty;    //難易度
+    public static Mode mode;                //敗北ユニットの処理
+    public static bool isModeInit;          //初期化フラグ
 
-    public static Difficulty difficulty;
-
-    public static Mode mode;
-
-    public static bool isModeInit;
-
-    //これ、最初の設定画面で設定するけどとりあえず仮
+    //最初の設定画面で設定しない場合、テスト用にこの値にする
     public void Init()
     {
         route = Route.REIMU;
@@ -25,18 +22,19 @@ public class ModeManager : MonoBehaviour
         isModeInit = true;
     }
 
-    //200829_レミリアモード実装 ボタンから呼ばれる
+    //200829_霊夢、レミリアルート設定
     public void setRoute(Route route)
     {
         ModeManager.route = route;
     }
 
-    //210220 やっとモードと難易度を設定
+    //210220 難易度設定
     public void SetDifficulty(Difficulty difficulty)
     {
         ModeManager.difficulty = difficulty;
     }
 
+    //敗北したユニットの処理設定
     public void SetMode(Mode mode)
     {
         ModeManager.mode = mode;

@@ -1,9 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
 /// <summary>
 /// 210303 “üèÏ‚İ‚Ì•ó” ‚Ìî•ñ
+/// “oê‚·‚éÍ‚ÆÀ•W‚ÅŠÇ—‚·‚é
 /// </summary>
 [System.Serializable]
 public class AcquiredTreasure

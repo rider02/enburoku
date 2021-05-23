@@ -4,6 +4,7 @@ using UnityEngine;
 
 /// <summary>
 /// 各ユニットがレベルアップした時のコメント
+/// LvUpImpreDatabaseでアセット化して使用する
 /// </summary>
 [System.Serializable]
 public class LvUpImpre

@@ -1,83 +1,84 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// 210521 戦闘中の敵、味方のステータスを表示するUI制御クラス
+/// </summary>
 public class ButtleStatusWindow : MonoBehaviour
 {
-    [SerializeField] GameObject nameWindow;
-    [SerializeField] Text nameText;//名前
-    [SerializeField] Text hpText;
-    [SerializeField] Text attackText;
-    [SerializeField] Text weaponText;
-    [SerializeField] Text hitRateText;
-    [SerializeField] Text criticalRateText;
-    [SerializeField] Slider hpSlider;
-    [SerializeField] GameObject chase;
-    [SerializeField] GameObject yuushaChase;
-    [SerializeField] GameObject advantage;
-    [SerializeField] GameObject disadvantage;
+    //各UI
+    [SerializeField] GameObject nameWindow;     //武器の名前表示枠
+    [SerializeField] Text nameText;             //名前
+    [SerializeField] Text hpText;               //HP
+    [SerializeField] Text attackText;           //攻撃力
+    [SerializeField] Text weaponText;           //武器名
+    [SerializeField] Text hitRateText;          //命中率
+    [SerializeField] Text criticalRateText;     //必殺率
+    [SerializeField] Slider hpSlider;           //HPゲージ
+    [SerializeField] GameObject chase;          //追撃アイコン
+    [SerializeField] GameObject yuushaChase;    //勇者武器アイコン
+    [SerializeField] GameObject advantage;      //相性有利アイコン
+    [SerializeField] GameObject disadvantage;   //相性不利アイコン
 
     
     [SerializeField] GameObject healTargetNameWindow;
     [SerializeField] Text healTargetNameText;
 
-    //ゲージが減る時間 少ない程早い
-    float HpDecrementTime = 0.1f;
-    float gaugeSplit;//ゲージの減少を何回にかけて行うか
-    float gaugeInterval = 0.01f;//ゲージの減少を行う間隔 少ない程なめらか
+    
+    float HpDecrementTime = 0.1f;   //ゲージが減る時間 少ない程早い
+    float gaugeSplit;               //ゲージの減少を何回にかけて行うか
+    float gaugeInterval = 0.01f;    //ゲージの減少を行う間隔 少ない程なめらか
 
     //ゲージ表示用HP。徐々に増えたり減ったりする
-    float gaugeHp;
-    int targetHp;//このHPまで減らしたい
-    bool isHpChange = false;//フラグが立ってる間減り続ける
-    float splitDiff;//指定した秒数でHPを変化させる場合の分割した値
+    int targetHp;                   //このHPになったら増減終了
+    bool isHpChange = false;        //フラグが立ってる間増減し続ける
+    float splitDiff;                //指定した秒数でHPを変化させる場合の分割した値
 
-    //　経過時間
-    private float elapsedTime = 0f;
+    
+    private float elapsedTime = 0f; //　経過時間
 
-    // Update is called once per frame
     void Update()
     {
-        //HP減少中なら
-        if (isHpChange)
+        //フラグが経った時のみHPゲージを増減させる
+        if (!isHpChange)
         {
-            //経過時間を取得する
-            elapsedTime += Time.deltaTime;
-
-            if (elapsedTime >= gaugeInterval)
-            {
-
-                elapsedTime = 0;
-                hpSlider.value -= splitDiff;
-
-                //ダメージの時
-                if (splitDiff >= 0)
-                {
-                    //実際の値までHPが下がったら
-                    if (hpSlider.value <= targetHp)
-                    {
-                        //減少中フラグをfalse
-                        isHpChange = false;
-                    }
-                }
-                else
-                {
-                    //回復の時
-                    //実際の値までHPが上がったら
-                    if (hpSlider.value >= targetHp)
-                    {
-                        //減少中フラグをfalse
-                        isHpChange = false;
-                    }
-                }
-                
-            }
+            return;
         }
-    }
 
-    //ユニットのステータスを反映するメソッドのDTO版
-    //敵ウィンドウに割り当てているインスタンスから呼ぶと動かないので注意
+        //経過時間を取得
+        elapsedTime += Time.deltaTime;
+
+        if (elapsedTime >= gaugeInterval)
+        {
+
+            elapsedTime = 0;
+
+            //ゲージ増減
+            hpSlider.value -= splitDiff;
+
+            //ダメージの時
+            if (splitDiff >= 0)
+            {
+                //実際の値までHPが下がったら減少終了
+                if (hpSlider.value <= targetHp)
+                {
+                    isHpChange = false;
+                }
+            }
+            else
+            {
+                //回復の時
+                //実際の値までHPが上がったら増加数量
+                if (hpSlider.value >= targetHp)
+                {
+                    isHpChange = false;
+                }
+            }
+                
+        }
+      }
+
+    //ユニットのステータスを反映する
     public void UpdatePleyerText(BattleParameterDTO battleParameterDTO)
     {
         nameText.text = battleParameterDTO.unitName;
@@ -87,7 +88,7 @@ public class ButtleStatusWindow : MonoBehaviour
         hpSlider.value = battleParameterDTO.unitHp;
         weaponText.text = battleParameterDTO.unitWeaponName;
 
-        //相性
+        //相性アイコンの制御
         if (battleParameterDTO.affinity == BattleWeaponAffinity.ADVANTAGE)
         {
             //有利な時
@@ -102,6 +103,7 @@ public class ButtleStatusWindow : MonoBehaviour
         }
         else
         {
+            //等倍
             advantage.SetActive(false);
             disadvantage.SetActive(false);
         }
@@ -125,10 +127,10 @@ public class ButtleStatusWindow : MonoBehaviour
                 attackText.color = Color.black;
             }
 
-            //追撃
+            //追撃アイコン制御
             if (battleParameterDTO.unitChaseFlag)
             {
-                //勇者武器の場合
+                //勇者武器のアイコン制御
                 if (battleParameterDTO.isUnitYuusha)
                 {
                     //4回攻撃
@@ -160,22 +162,20 @@ public class ButtleStatusWindow : MonoBehaviour
                 }
                     
             }
-
-            
         }
         else
         {
-            //攻撃出来ない時
+            //攻撃出来ない時は「-」を表示
             attackText.text = "-";
             hitRateText.text = "-";
             criticalRateText.text = "-";
 
-            //相性や追撃は非表示にする
+            //相性や追撃アイコンは非表示にする
             chase.SetActive(false);
         }
     }
 
-    //敵のステータスを反映するメソッドのDTO版
+    //敵のステータスを反映する UpdatePleyerTextと同じ変更を反映すること
     public void UpdateEnemyText(BattleParameterDTO battleParameterDTO)
     {
         nameText.text = battleParameterDTO.enemyName;
@@ -276,11 +276,11 @@ public class ButtleStatusWindow : MonoBehaviour
     }
 
     /// <summary>
-    /// 210216 回復をする側
+    /// 210216 回復をする側のUI制御
     /// </summary>
     public void UpdateHealText(HealParameterDTO healParameterDTO)
     {
-        //enemyと書いてるけどプレイヤー 名前と杖の名前を表示
+        //プレイヤー 名前と杖の名前を表示
         nameText.text = healParameterDTO.unitName;
         weaponText.text = healParameterDTO.unitHealRodName;
 
@@ -291,6 +291,7 @@ public class ButtleStatusWindow : MonoBehaviour
         attackText.text = healParameterDTO.healAmount.ToString();
         hitRateText.text = "-";
         criticalRateText.text = "-";
+        attackText.color = Color.black;//210523 前の攻撃が特効の場合は、UIの文字色が赤くなっている場合が有る
 
         hpSlider.maxValue = healParameterDTO.unitMaxHp;
         hpSlider.value = healParameterDTO.unitHp;
@@ -302,7 +303,7 @@ public class ButtleStatusWindow : MonoBehaviour
     }
 
     /// <summary>
-    /// 210216 回復をされる側
+    /// 210216 回復をされる側のUI制御
     /// </summary>
     public void UpdateHealTargetText(HealParameterDTO healParameterDTO)
     {
@@ -325,6 +326,7 @@ public class ButtleStatusWindow : MonoBehaviour
     }
 
     //210216 回復と攻撃で結構UIが変わるので変化させる
+    //攻撃時のUI
     public void SetAttackMode()
     {
         //nullチェックしているのは、対象のみUIが変化する為
@@ -338,6 +340,7 @@ public class ButtleStatusWindow : MonoBehaviour
         }
     }
 
+    //回復時のUI
     public void SetHealMode()
     {
         if (nameWindow != null)
@@ -356,22 +359,21 @@ public class ButtleStatusWindow : MonoBehaviour
     public void UpdateHp(int hp)
     {
         //現在のHPの数値から戦闘後のHPをを引いて受けたダメージを計算
-        //210216 これ、回復にも適用されるようになったのでdamageではなくdiff
         int diff = int.Parse(hpText.text) - hp;
         
         //数値を更新
         hpText.text = hp.ToString();
 
-        //このHPまで変化させたい
+        //このHPまで変化したらゲージ増減停止
         targetHp = hp;
 
 
-        //何秒に1回ゲージを更新するかは固定
+        //何フレームに1回ゲージを更新するかは固定
         //ゲージを分割する数を求める
         gaugeSplit = HpDecrementTime / gaugeInterval;
         splitDiff = diff / gaugeSplit;
 
-        //ゲージのHPを減少中に
+        //ゲージのHPを減少中にするとUpdateの処理開始
         isHpChange = true;
     }
 

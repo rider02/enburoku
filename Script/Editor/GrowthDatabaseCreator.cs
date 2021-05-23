@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 /// <summary>
-/// ユニット初期値のアセットファイルを作ってくれるクラス
+/// 成長率ScriptabeleObject製作用クラス
 /// Unity上部の「Create」から使用する
 /// </summary>
 public static class GrowthDatabaseCreator

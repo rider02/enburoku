@@ -5,20 +5,17 @@ using UnityEngine.UI;
 
 /// <summary>
 /// 210217 戦闘マップ、ステータス画面でアイテムの詳細を表示するウィンドウ
+/// 武器に比べるとその他のアイテムは表示内容が少ないので別のクラス
 /// </summary>
 public class ItemDetailWindow : MonoBehaviour
 {
-    [SerializeField]
-    Text itemName;  //アイテム名
+    [SerializeField] Text itemName;  //アイテム名
 
-    [SerializeField]
-    Text detailText;//説明
+    [SerializeField] Text detailText;//説明
 
-    [SerializeField]
-    Image icon;
+    [SerializeField] Image icon;
 
-    [SerializeField]
-    Sprite[] iconList;
+    [SerializeField] Sprite[] iconList;
 
     /// <summary>
     /// アイテムを選択されるとボタンから呼ばれる

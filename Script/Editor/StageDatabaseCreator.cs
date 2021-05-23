@@ -6,8 +6,8 @@ using JetBrains.Annotations;
 
 /// <summary>
 /// 200808
-/// ステージの出撃可能人数、出撃画面フラグ、ユニットの座標を管理するSTAGEクラスを
-/// ScriptableObject化
+/// ステージの出撃可能人数、出撃画面フラグ、ユニットの座標を管理するSTAGEクラスをScriptableObject化
+/// あらすじ等も記載 他の武器、ユニット、敵データベース作成後に作らないと反映されないので最後にCreateすること
 /// </summary>
 /// 
 public static class StageDatabaseCreator
@@ -17,28 +17,22 @@ public static class StageDatabaseCreator
     private static void Create()
     {
 
+        //地形効果、敵、武器、アイテムも本クラスに持たせるので読み込み
         StageDatabase stageDatabase = ScriptableObject.CreateInstance<StageDatabase>();
-
         EnemyDatabase enemyDatabase = Resources.Load<EnemyDatabase>("enemyDatabase");
-
-        //武器の初期化用にデータベース取得
         WeaponDatabase weaponDatabase = Resources.Load<WeaponDatabase>("weaponDatabase");
-
         AccessoryDatabase accessoryDatabase = Resources.Load<AccessoryDatabase>("accessoryDatabase");
-
         ToolDatabase toolDatabase = Resources.Load<ToolDatabase>("toolDatabase");
-
         PotionDatabase potionDatabase = Resources.Load<PotionDatabase>("potionDatabase");
 
         //ステージ1 博麗神社
         Chapter chapter = Chapter.STAGE1;
 
-        //falseで出撃は霊夢１人だけにする
-        bool isUnitSelectRequired = false;
+        bool isUnitSelectRequired = false;  //出撃時にユニット選択出来るか falseで出撃は霊夢１人だけにする
 
-        int entryUnitCount = 1;
+        int entryUnitCount = 1;     //出撃人数
 
-        bool isReimuRoute = true;
+        bool isReimuRoute = true;   //霊夢ルートか falseならレミリアルート ステージ選択時に使用
 
         //ユニットを配置する座標
         //霊夢1人のみ
@@ -69,7 +63,7 @@ public static class StageDatabaseCreator
         List<Item> carryItem = new List<Item>();
         carryItem.Add(item);
 
-        //座標は適当
+        //座標
         Coordinate coordinate = new Coordinate(10,9);
         EnemyAIPattern pattern = EnemyAIPattern.REACT;
 
@@ -87,7 +81,7 @@ public static class StageDatabaseCreator
         carryItem = new List<Item>();
         carryItem.Add(item);
 
-        //座標は適当
+        //座標
         coordinate = new Coordinate(7, 10);
         pattern = EnemyAIPattern.REACT;
 
@@ -105,7 +99,7 @@ public static class StageDatabaseCreator
         carryItem = new List<Item>();
         carryItem.Add(item);
 
-        //座標は適当
+        //座標
         coordinate = new Coordinate(13, 10);
         pattern = EnemyAIPattern.REACT;
 
@@ -123,7 +117,7 @@ public static class StageDatabaseCreator
         carryItem = new List<Item>();
         carryItem.Add(item);
 
-        //座標は適当
+        //座標
         coordinate = new Coordinate(10, 7);
         pattern = EnemyAIPattern.SEARCH;
 
@@ -148,7 +142,7 @@ public static class StageDatabaseCreator
 
         carryItem.Add(item);
 
-        //座標は適当
+        //座標
         coordinate = new Coordinate(10, 13);
         pattern = EnemyAIPattern.REACT;
 

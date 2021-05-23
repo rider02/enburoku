@@ -2,7 +2,7 @@
 using UnityEngine.UI;
 
 /// <summary>
-/// ステージの情報を表示させるだけのクラス
+/// ステージの情報を表示させるクラス
 /// </summary>
 public class StageDetailWindow : MonoBehaviour
 {

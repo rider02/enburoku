@@ -3,7 +3,7 @@ using UnityEngine;
 using System.Linq;
 
 /// <summary>
-/// 列挙型を渡すとステージを返してくれる
+/// ステージScriptableObject精製用クラス
 /// </summary>
 public class StageDatabase : ScriptableObject
 {

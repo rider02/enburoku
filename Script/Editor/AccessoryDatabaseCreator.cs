@@ -4,7 +4,8 @@ using UnityEditor;
 using System.Linq;
 
 /// <summary>
-/// 210218 アクセサリ一覧 やっと作った
+/// 210218 アクセサリ一覧ScriptabeleObject製作用クラス
+/// Unity上部の「Create」から使用する
 /// </summary>
 public static class AccessoryDatabaseCreator
 {
@@ -18,12 +19,12 @@ public static class AccessoryDatabaseCreator
         //データを設定
         string name = "経験の熊手";
         string text = "獲得経験値1.5倍";
-        AccessoryEffectType effect = AccessoryEffectType.EXPUP;
+        AccessoryEffectType effect = AccessoryEffectType.EXPUP; //アクセサリの効果
 
-        int delay = 0;
-        int amount = 0;//経験の熊手はfloatになると面倒なので別個計算
-        int price = 5000;
-        bool isNfs = true;
+        int delay = 0;      //重さ
+        int amount = 0;     //補正値 経験の熊手はfloatになると面倒なので別個計算
+        int price = 5000;   //値段
+        bool isNfs = true;  //NotForSale 非売品
 
         Accessory accessory = new Accessory(name, text, delay, effect, amount, price, isNfs);
         accessoryDatabase.accessoryList.Add(accessory);

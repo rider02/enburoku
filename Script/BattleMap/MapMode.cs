@@ -1,16 +1,12 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-/// <summary>
-/// 200725 フラグだと大変なので、モードで管理
+﻿/// <summary>
+/// 200725 戦闘シーンのモード
 /// </summary>
 public enum MapMode
 {
 
     [StringValue("出撃準備")]
-    [ControllAble(false)]
-    [MenuVisible(true)]
+    [ControllAble(false)]   //十字キーの操作でカーソルが移動出来るか
+    [MenuVisible(true)]     //メニュー(uGUI)が表示されているか uGUIの制御用
     PREPARATION,
 
     [StringValue("出撃ユニット選択")]
@@ -137,6 +133,12 @@ public enum MapMode
     [ControllAble(false)]
     [MenuVisible(false)]
     TALK,
+
+    //宝箱を開けた場合などに遷移する
+    [StringValue("メッセージ")]
+    [ControllAble(false)]
+    [MenuVisible(true)]
+    MESSAGE,
 
     [StringValue("ターン開始会話")]
     [ControllAble(false)]

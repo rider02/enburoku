@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UniRx;
-using UnityEngine;
-using UnityEngine.UI;
+﻿using UnityEngine;
 
 /// <summary>
 /// 200719 クラスチェンジを行う
@@ -10,7 +6,6 @@ using UnityEngine.UI;
 public class ClassChangeManager : MonoBehaviour
 {
     private GameObject classChangeWindow;
-    private GameObject content;
 
     StatusManager statusManager;
 
@@ -40,6 +35,8 @@ public class ClassChangeManager : MonoBehaviour
 
             //Resources配下からボタンをロード
             var classChangeButton = (Instantiate(Resources.Load("Prefabs/ClassChangeButton")) as GameObject).transform;
+
+            //転職先が存在しない場合のボタンを作成
             classChangeButton.GetComponent<ClassChangeButton>().DisableInit();
             classChangeButton.name = classChangeButton.name.Replace("(Clone)", "");
 
@@ -115,7 +112,7 @@ public class ClassChangeManager : MonoBehaviour
         unit.job = job;
 
         //ユニットリスト更新
-        unitController.updateUnit(unit);
+        unitController.UpdateUnit(unit);
 
         //キャンセルボタン押下と同じ事をしてウィンドウを閉じる
         //200724 ちゃんとした画面遷移を今後作りたい

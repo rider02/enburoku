@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 
 /// <summary>
 /// 初期化時にtxtを読み込んで、#Sceneを元にScene型の配列を作るクラス
-/// 全メソッド初期化後はもうScenes以外呼ばれる事は無い＾＾
+/// 全メソッド初期化後はもうScenes以外呼ばれる事は無い
 /// </summary>
 public class SceneHolder
 {
@@ -23,9 +19,9 @@ public class SceneHolder
         Load(scenarioPath);
     }
 
-    //txt読み込み コンストラクタから呼ばれるのみ
+    //txt読み込み コンストラクタから呼ばれ、Resources配下のテキストを読み込む
     public void Load(string scenarioPath)
-    {   //  Resouces/CSV下のtxt読み込み TextAsset形式でtxtを全て取得
+    {   //  Resouces/CSV下のtxt読み込み TextAsset形式でtxtを取得
         //LoadはObject型を返すので型変換が必要
         var itemFile = Resources.Load(scenarioPath) as TextAsset;
         //1行ずつ取得してList<string>形式で受け取る
@@ -37,7 +33,7 @@ public class SceneHolder
 
 
     //txt読み込み コンストラクタから呼ばれるのみ
-    public List<string> LoadCSV(TextAsset file)
+    private List<string> LoadCSV(TextAsset file)
     {
 
         StringReader reader = new StringReader(file.text);
@@ -52,8 +48,8 @@ public class SceneHolder
         return list;
     }
 
-    //String型のリストを受け取るとscene型のリストを返す
-    public List<Scene> Parse(List<string> list)
+    //String型のリストを「#scene」ごとにscene型のリストに変換
+    private List<Scene> Parse(List<string> list)
     {
         var scenes = new List<Scene>();
         var scene = new Scene();

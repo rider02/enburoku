@@ -1,10 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
-/// 少しBattleManagerに集約させ過ぎなのでこっちへ
-/// 敵と
+/// 戦闘の味方と敵のUIを制御するクラス
 /// </summary>
 public class BattleView : MonoBehaviour
 {
@@ -14,10 +11,7 @@ public class BattleView : MonoBehaviour
     [SerializeField]
     ButtleStatusWindow enemyStatusWindow;
 
-    /// <summary>
-    /// battleParameterDTOを受け取ったら
-    /// </summary>
-    /// <param name="battleParameterDTO"></param>
+    //戦闘の情報を表示する
     public void UpdateText(BattleParameterDTO battleParameterDTO)
     {
         SetAttackMode();
@@ -32,17 +26,19 @@ public class BattleView : MonoBehaviour
         enemyStatusWindow.UpdateHealTargetText(healParameterDTO);
     }
 
-    //210216 回復の場合はUIが結構変わる
+    //210216 通常の戦闘のUI
     public void SetAttackMode()
     {
         enemyStatusWindow.SetAttackMode();
     }
 
+    //210216 回復の場合、相手が反撃してくる事は絶対有り得ないのでUI変更
     public void SetHealMode()
     {
         enemyStatusWindow.SetHealMode();
     }
 
+    //HPの更新とゲージの変動開始
     public void UpdateEnemyHp(int hp)
     {
         enemyStatusWindow.UpdateHp(hp);

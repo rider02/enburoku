@@ -1,8 +1,9 @@
-﻿using UniRx;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using UniRx;
 
+//スクロールUI実装用クラス
 namespace ScrollUI
 {
     public class FollowSelectedNode : MonoBehaviour

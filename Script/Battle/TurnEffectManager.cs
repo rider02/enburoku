@@ -1,11 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
 
 /// <summary>
-/// 210210 ターン開始アニメーション等を実装する
+/// 210210 ターン開始アニメーションを制御する
 /// </summary>
 public class TurnEffectManager : MonoBehaviour
 {
@@ -45,7 +43,7 @@ public class TurnEffectManager : MonoBehaviour
         //シーケンス初期化
     }
 
-    //実行前に呼び出してフラグを倒す
+    //実行前に呼び出して初期化
     public void EffectInit()
     {
         isEffectInit = false;

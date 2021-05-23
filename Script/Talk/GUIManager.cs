@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
-using UnityEngine.EventSystems;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
 
+/// <summary>
+/// 会話シーンの名前パネル、テキスト等を制御するWindowクラス
+/// </summary>
 public class GUIManager : MonoBehaviour
 {
     public Camera MainCamera;

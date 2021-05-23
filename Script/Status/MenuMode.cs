@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// ステータス画面の状態列挙型
+/// </summary>
 public enum MenuMode
 {
     [StringValue("出撃準備")]

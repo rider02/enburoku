@@ -4,12 +4,13 @@ using UnityEditor;
 using System.Linq;
 
 /// <summary>
-/// レベルアップした時のコメントリストを作成する
-/// 各キャラ基本3種類
-/// 0～2ピン
-/// 3～5ピン
-/// 6～8ピン
-/// あと、成長が限界になった時の台詞が有っても良いかも
+/// レベルアップした時の感想ScriptabeleObject製作用クラス
+/// Unity上部の「Create」から使用する
+/// 各キャラ3種類必ず存在する
+/// 0～2ピン : あまり良くない反応
+/// 3～5ピン : 普通
+/// 6～8ピン : 良い反応
+/// TODO あと、成長が限界になった時の台詞が有っても良いかも
 /// </summary>
 public static class LvUpImpreCreator
 {

@@ -3,7 +3,7 @@ using UnityEngine;
 using System.Linq;
 
 /// <summary>
-/// アクセサリ一覧のクラス
+/// アクセサリ一覧のScriptableObject精製用クラス
 /// </summary>
 public class AccessoryDatabase : ScriptableObject
 {

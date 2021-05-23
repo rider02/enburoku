@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,6 +6,7 @@ using UnityEngine;
 /// </summary>
 public class AcquiredTreasureManager : MonoBehaviour
 {
+    //“üèÏ‚İ‚Ì•ó” ƒŠƒXƒg
     public static List<AcquiredTreasure> treasureList { get; set; }
     public static bool isInit;
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 /// <summary>
-/// 武器一覧のクラス
+/// 武器ScriptableObject精製用クラス
 /// </summary>
 public class WeaponDatabase : ScriptableObject
 {

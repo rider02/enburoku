@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -58,10 +57,10 @@ public class ItemExchangeWindow : MonoBehaviour
 
 
     /// <summary>
-    /// 210222 2人分のUnitOutline表示 面倒過ぎる
+    /// 210222 2人分のUnitOutline表示
     /// </summary>
-    /// <param name="unit"></param>
-    /// <param name="targetUnit"></param>
+    /// <param name="unit">交換元ユニット</param>
+    /// <param name="targetUnit">交換先ユニット</param>
     public void Init(Unit unit, Unit targetUnit, StatusManager statusManager)
     {
 
@@ -69,24 +68,31 @@ public class ItemExchangeWindow : MonoBehaviour
         JobStatusDto statusDto = unit.job.statusDto;
         JobStatusDto targetStatusDto = targetUnit.job.statusDto;
 
+        //名前
         this.unitNameText.text = unit.name;
         this.targetNameText.text = targetUnit.name;
 
+        //レベル
         this.unitLv.text = unit.lv.ToString();
         this.targetLv.text = targetUnit.lv.ToString();
 
+        //HP
         this.unitHp.text = (unit.hp + statusDto.jobHp).ToString();
         this.targetHp.text = (targetUnit.hp + targetStatusDto.jobHp).ToString();
 
+        //職業
         this.unitJob.text = unit.job.jobName.ToString();
         this.targetJob.text = targetUnit.job.jobName.ToString();
 
+        //経験値
         this.unitExp.text = unit.exp.ToString();
         this.targetExp.text = targetUnit.exp.ToString();
 
+        //HP
         this.unitMaxHp.text = string.Format("/  {0}", (unit.maxhp + statusDto.jobHp).ToString());
         this.targetMaxHp.text = string.Format("/  {0}", (targetUnit.maxhp + targetStatusDto.jobHp).ToString());
 
+        //画像
         this.image.sprite = Resources.Load<Sprite>("Image/Charactors/" + unit.pathName + "/status");
         this.targetImage.sprite = Resources.Load<Sprite>("Image/Charactors/" + targetUnit.pathName + "/status");
 
@@ -99,9 +105,6 @@ public class ItemExchangeWindow : MonoBehaviour
     private void CreateItemButton(Unit unit, GameObject itemWindow, StatusManager statusManager)
     {
         List<Item> itemList = unit.carryItem;
-
-        //BattleMapManagerのOpenItemWindowを参考に作成
-        //共通化は不活性、フォーカス等が有り、少し難しいと思う
 
         int index = 0;
         //アイテム一覧を作成
@@ -147,9 +150,6 @@ public class ItemExchangeWindow : MonoBehaviour
     {
         //ボタンの更新を行う 交換したボタンを取得
         StatusItemButton statusItemButton = unitItemWindow.transform.Find("StatusItemButton" + index).GetComponent<StatusItemButton>();
-
-
-
         CreateItemButton(unit, unitItemWindow, statusManager);
     }
 
@@ -180,6 +180,7 @@ public class ItemExchangeWindow : MonoBehaviour
 
     }
 
+    //フォーカス変更
     public void FocusItemButton(int index, bool isLefttoRight)
     {
         if (isLefttoRight)

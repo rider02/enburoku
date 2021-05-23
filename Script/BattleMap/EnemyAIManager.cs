@@ -334,7 +334,7 @@ public class EnemyAIManager : MonoBehaviour
         //敵ターン終了時に敵が存在しなければクリア
         if(enemyContainer.childCount == 0)
         {
-            battleMapManager.StageCrear();
+            battleMapManager.StageClear();
             return;
         }
 
@@ -348,5 +348,26 @@ public class EnemyAIManager : MonoBehaviour
         //210520 ターン開始前会話が存在すればターン開始前会話へ
         battleMapManager.SetMapMode(MapMode.TURN_START);
         Debug.Log("mapMode = " + battleMapManager.mapMode);
+    }
+
+    //戦闘後等に敵を行動済みにする
+    public void BattleEnd()
+    {
+        if (mainMap.ActiveEnemy != null)
+        {
+            mainMap.ActiveEnemy.isMoved = true;
+            mainMap.ActiveEnemy.SetBeforeAction(false);
+        }
+        //再度未行動の敵を取得する処理へ 行動を行った敵は行動済みなので、次の敵が選ばれる
+        battleMapManager.SetMapMode(MapMode.ENEMY_TURN);
+
+        SetEnemyAIPhase(EnemyAIPhase.GET_ENEMY);
+    }
+
+    //敵ターンの状態変更とログ出力
+    public void SetEnemyAIPhase(EnemyAIPhase enemyAIPhase)
+    {
+        this.enemyAIPhase = enemyAIPhase;
+        Debug.Log("EnemyAIPhase : " + enemyAIPhase);
     }
 }

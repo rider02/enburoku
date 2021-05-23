@@ -8,25 +8,17 @@ using UnityEngine.UI;
 /// </summary>
 public class ClassChangeButton : MonoBehaviour
 {
-    [SerializeField]
-    private Text classChangeDestinationText;
+    //クラスチェンジ先
+    [SerializeField] private Text classChangeDestinationText;
 
     private StatusManager statusManager;
-
     private ClassChangeManager classChangeManager;
-
     private ClassChangeDetailWindow classChangeDetailWindow;
 
-    //職業の補正、ステータス表示の為持たせておく
-    private Job job;
-
-    //クラスチェンジ対象キャラを持たせておく
-    private string unitName;
-
-    private int unitLv;
-
-    private bool isDisable;
-
+    
+    private Job job;            //職業 補正値表示の為持たせておく
+    private string unitName;    //クラスチェンジ対象キャラ
+    private bool isDisable;     //不活性だが選択出来る状態
     private string message;
 
 
@@ -35,24 +27,14 @@ public class ClassChangeButton : MonoBehaviour
         StatusManager statusManager, ClassChangeDetailWindow classChangeDetailWindow)
     {
 
-        //詳細表示用に持たせておく
         this.job = job;
-
         this.unitName = unit.name;
-
-        this.unitLv = unit.lv;
-
         this.classChangeManager = classChangeManager;
-
         this.statusManager = statusManager;
-
         this.classChangeDetailWindow = classChangeDetailWindow;
 
         //ボタンの文字を設定
         classChangeDestinationText.text = job.jobName.ToString();
-
-        
-
     }
 
     //クラスチェンジ先が存在しない場合
@@ -65,9 +47,8 @@ public class ClassChangeButton : MonoBehaviour
 
     }
 
-    /// <summary>
-    /// 文字を灰色にして無効フラグを立てる 選択は出来るがエラーメッセージを表示
-    /// </summary>
+    // レベルが足りていない時に呼び出し
+    // 文字を灰色にして無効フラグを立てる 選択は出来るがエラーメッセージを表示
     public void setDisable(string message)
     {
         this.message = message;
@@ -78,7 +59,7 @@ public class ClassChangeButton : MonoBehaviour
     public void Onclick()
     {
 
-        //レベルによるボタン無効化処理
+        //レベル不足でボタンが無効化されていたら
         if (isDisable)
         {
             statusManager.OpenMessageWindow(message);
@@ -106,7 +87,7 @@ public class ClassChangeButton : MonoBehaviour
             return;
         }
 
-        classChangeDetailWindow.updateText(job);
+        classChangeDetailWindow.UpdateText(job);
     }
 
 }

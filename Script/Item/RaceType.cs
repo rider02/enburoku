@@ -1,10 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
 /// <summary>
 /// 210219 ユニットに設定した場合は種族
-/// 武器に設定した場合は特効対象
+/// 武器に設定した場合は特効対象で、敵ユニットと一致したら特効
 /// </summary>
 public enum RaceType
 {

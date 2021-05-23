@@ -1,7 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
 /// <summary>
 /// 210218
 /// バフ、補正等を別クラスで設定する為のDTO
@@ -33,8 +29,6 @@ public class StatusDto
 
     //近防
     public int cdef;
-
-    //必要が有れば命中率、回避率、必殺率も渡す
 
     public StatusDto(int hp, int latk, int catk, int agi, int dex, int ldef, int cdef, int luk)
     {

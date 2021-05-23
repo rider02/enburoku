@@ -190,7 +190,7 @@ public class TalkManager : MonoBehaviour
             friendLevelButton.name = unitName + "_" + friendName + "_" + talkLevel;
             friendLevelButton.GetComponent<FriendLevelButton>().UpdateText(talkLevel);
             friendLevelButton.GetComponent<FriendLevelButton>().Init(this);
-            panel.GetComponent<FriendPanel>().addFriendLevelList(friendLevelButton);
+            panel.GetComponent<FriendPanel>().AddFriendLevelList(friendLevelButton);
         }
     }
 

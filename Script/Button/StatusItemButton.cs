@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-//200726 ステータス画面にアイテムを表示する用のボタン
+/// <summary>
+/// 200726 ステータス画面にアイテムを表示する用のボタン
+/// ステータス画面、戦闘画面の２シーン共通で使用
+/// </summary>
 public class StatusItemButton : MonoBehaviour
 {
     //武器名
@@ -71,7 +74,7 @@ public class StatusItemButton : MonoBehaviour
         }
     }
 
-    //ステータス画面の装備アクセサリ用 押しても何も起こらない
+    //ステータス画面の装備アクセサリ用
     public void InitAccessoryButton(Accessory accessory)
     {
         //装備している武器なので装備マークは表示しない
@@ -124,7 +127,7 @@ public class StatusItemButton : MonoBehaviour
             if(unit != null)
             {
                 //装備出来るかどうか確認して出来ない場合はグレーアウト
-                if (WeaponEquipWarn.NONE != getWeaponEquipWarn(weapon, unit))
+                if (WeaponEquipWarn.NONE != WeaponEquipWarnUtil.GetWeaponEquipWarn(weapon, unit))
                 {
                     isEquipable = false;
                     itemNameText.color = new Color(170 / 255f, 170 / 255f, 170 / 255f);
@@ -209,13 +212,7 @@ public class StatusItemButton : MonoBehaviour
 
     }
 
-
-    public void ToolInit(Tool tool, StatusManager statusManager, Unit unit)
-    {
-        
-    }
-
-    //空のボタン初期化メソッド
+    //空のボタン初期化メソッド 手持ちアイテムが6個に満たない場合は表示
     public void InitEmptyButton(StatusManager statusManager, Unit unit,int index)
     {
         //配下の名前、回数、値段を設定
@@ -230,6 +227,7 @@ public class StatusItemButton : MonoBehaviour
 
     }
 
+    //クリック時 モードによりアイテム交換、交換アイテム選択、アイテムを預ける、取り出す等
     public void Onclick()
     {
 
@@ -263,6 +261,7 @@ public class StatusItemButton : MonoBehaviour
 
     public void OnSelect()
     {
+        //210522 TODO 戦闘シーンで選択した場合の処理を追加
         if(statusManager == null)
         {
             return;
@@ -308,86 +307,5 @@ public class StatusItemButton : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 210224 BattleManagerから取ってきたが、staticメソッド等でまとめた方が良い
-    /// </summary>
-    /// <param name="weapon"></param>
-    /// <param name="unit"></param>
-    /// <returns></returns>
-    private WeaponEquipWarn getWeaponEquipWarn(Weapon weapon, Unit unit)
-    {
-
-        //210217 武器の熟練度判定実施用にユニットが持っている適正一覧を取得
-
-        //1.専用武器の判定
-        if (weapon.isPrivate)
-        {
-            //専用武器の場合、持ち主と使用者が一致しなければエラー
-            if (weapon.ownerName != unit.name)
-            {
-                return WeaponEquipWarn.PRIVATE_WEAPON;
-            }
-        }
-
-        //2.壊れているか判定
-        if (weapon.endurance <= 0)
-        {
-            return WeaponEquipWarn.BROKEN;
-        }
-
-        //3.適正の判定 武騎手のスキルレベルがNONEだと装備不可
-        //4.スキルレベルが足りていないと装備不可
-        if (weapon.type == WeaponType.SHOT)
-        {
-            if (unit.shotLevel == SkillLevel.NONE)
-            {
-                return WeaponEquipWarn.SKILL_NONE;
-            }
-            else if (weapon.skillLevel.GetPriorityValue() > unit.shotLevel.GetPriorityValue())
-            {
-                //武器の要求レベルがスキルレベル以上ならエラー
-                return WeaponEquipWarn.SKILL_LEVEL_NEED;
-            }
-
-
-        }
-        else if (weapon.type == WeaponType.LASER)
-        {
-            if (unit.laserLevel == SkillLevel.NONE)
-            {
-                return WeaponEquipWarn.SKILL_NONE;
-            }
-            else if (weapon.skillLevel.GetPriorityValue() > unit.laserLevel.GetPriorityValue())
-            {
-                return WeaponEquipWarn.SKILL_LEVEL_NEED;
-            }
-
-        }
-        else if (weapon.type == WeaponType.STRIKE)
-        {
-            if (unit.strikeLevel == SkillLevel.NONE)
-            {
-                return WeaponEquipWarn.SKILL_NONE;
-            }
-            else if (weapon.skillLevel.GetPriorityValue() > unit.strikeLevel.GetPriorityValue())
-            {
-                return WeaponEquipWarn.SKILL_LEVEL_NEED;
-            }
-
-        }
-        else if (weapon.type == WeaponType.HEAL)
-        {
-            if (unit.healLevel == SkillLevel.NONE)
-            {
-                return WeaponEquipWarn.SKILL_NONE;
-            }
-            else if (weapon.skillLevel.GetPriorityValue() > unit.healLevel.GetPriorityValue())
-            {
-                return WeaponEquipWarn.SKILL_LEVEL_NEED;
-            }
-        }
-
-        //エラーなし
-        return WeaponEquipWarn.NONE;
-    }
+    
 }

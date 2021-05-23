@@ -1,10 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
 /// 210218 道具の使用確認ウィンドウ
-/// 機能は滅茶苦茶少ないが、使用するアイテムを保持させておく機能を持たせる
+/// 機能は少ないが、使用するアイテムを保持させておく機能を持たせる
 /// </summary>
 public class UseItemConfirmWindow : MonoBehaviour
 {

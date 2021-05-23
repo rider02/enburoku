@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 
+/// 210521 経験値増加ゲージを表示するUI
 /// </summary>
 public class EXPWindow : MonoBehaviour
 {
@@ -19,16 +19,17 @@ public class EXPWindow : MonoBehaviour
     //ゲージの増加を行う間隔 少ない程なめらか
     float gaugeInterval = 0.01f;
 
+    //経験値増加完了フラグ
     bool expIncrementFinish = false;
 
     //　経過時間
     private float elapsedTime = 0f;
 
-    //210301 Unity開始初期に作ったゲージだけど普通に使えるのでは
+    //210301 Unity開始初期に作ったゲージだけど普通に使える
     public bool ExpGaugeUpdate()
     {
         
-        //経過時間を取得する
+        //経過時間を取得
         elapsedTime += Time.deltaTime;
 
         if (elapsedTime <= gaugeInterval)
@@ -51,7 +52,7 @@ public class EXPWindow : MonoBehaviour
         //効果音再生
         audioSource.Play();
 
-        //100を超えたら折り返し
+        //100を超えたらレベルアップ 折り返して余りを加算
         if (expSlider.value >= 100)
         {
             expSlider.value = expSlider.value - 100;
@@ -76,10 +77,12 @@ public class EXPWindow : MonoBehaviour
     /// <param name="getExp">現在の経験値 + 獲得した経験値</param>
     public void InitExpGauge(int playerExp , int getExp)
     {
+        //経験値を数値とゲージに反映
         expNumText.text = string.Format("{0}", playerExp);
         expSlider.value = playerExp;
         Debug.Log($"現在の経験値:{playerExp}, 獲得経験値:{getExp}");
 
+        //この値までゲージが増加する
         this.targetExp = playerExp + getExp;
 
         expIncrementFinish = false;

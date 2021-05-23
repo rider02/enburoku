@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 /// <summary>
-/// 敵一覧を作ってくれるクラス
+/// 敵一覧ScriptableObject精製用クラス
 /// UnitDatabaseとほぼ同じ
 /// </summary>
 public class EnemyDatabase : ScriptableObject

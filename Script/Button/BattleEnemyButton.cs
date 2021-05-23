@@ -4,7 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Battleシーンで敵を選択する為のボタン 本番では使わなさそう
+/// 210522 戦闘テストで敵を選択する為のボタン
+/// テスト画面用で本編では使わない
 /// </summary>
 public class BattleEnemyButton : MonoBehaviour
 {
@@ -16,10 +17,9 @@ public class BattleEnemyButton : MonoBehaviour
 
     public void Init(string enemyName, BattleManager battleManager)
     {
-        //配下のテキストを変更
+        //ボタンに敵の名前を設定
         buttonText.text = enemyName;
-        //Prefubは自分配下以外は[SerializeField]出来ないので、
-        //初期化時にインスタンスを渡して貰う
+
         this.battleManager = battleManager;
     }
 
@@ -27,7 +27,7 @@ public class BattleEnemyButton : MonoBehaviour
     public void Onclick()
     {
         battleManager.selectedEnemyName = buttonText.text;
-        battleManager.OpenBattleView();
+        //battleManager.OpenBattleView();
     }
 
     //選択された時に実行

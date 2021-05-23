@@ -12,7 +12,6 @@ public class BattleSceneReader
 {
     private BattleSceneController sceneController;
     private BattleTalkManager battleTalkManager;
-    private Actions actions;
 
     //コンストラクタ
     public BattleSceneReader(BattleSceneController sceneController, BattleTalkManager battleTalkManager)
@@ -21,7 +20,6 @@ public class BattleSceneReader
         this.sceneController = sceneController;
         this.battleTalkManager = battleTalkManager;
 
-        actions = sceneController.Actions;
     }
 
 
@@ -96,13 +94,6 @@ public class BattleSceneReader
                     line = line.Replace("leave=", "");
                     sceneController.LeaveCaracter(line);
                 }
-                else if (line.Contains("move"))
-                {
-                    //210515 キャラの移動
-                    line = line.Replace("move=", "");
-                    var splitted = line.Split('_');
-                    sceneController.MoveCharactor(splitted[0], splitted[1]);
-                }
                 //#image_hiroko=aseri のように来た時 画像変更
                 else if (line.Contains("image"))
                 {
@@ -115,9 +106,7 @@ public class BattleSceneReader
                 else if (line.Contains("method"))
                 {
                     line = line.Replace("method=", "");
-                    var type = actions.GetType();
-                    MethodInfo mi = type.GetMethod(line);
-                    mi.Invoke(actions, new object[] { });
+                    //未設定
                 }
                 else if (line.Contains("end"))
                 {

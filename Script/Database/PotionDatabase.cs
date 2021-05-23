@@ -4,7 +4,7 @@ using System.Linq;
 
 
 /// <summary>
-/// アイテム一覧のクラス
+/// アイテム一覧ScriptableObject精製用クラス
 /// </summary>
 public class PotionDatabase : ScriptableObject
 {

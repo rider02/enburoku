@@ -2,15 +2,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// 210522 お店の武器一覧制御用クラス
+/// TODO ShopManagerに統合しても良いのでは？
+/// </summary>
 public class WeaponController : MonoBehaviour
 {
 
     private GameObject buyWindow;
     private GameObject content;
 
-    //売却ウィンドウは非アクティブだからこっちだけSerializeField^^；
-    [SerializeField]
-    private GameObject saleContent;
+    [SerializeField] private GameObject saleContent;
 
 
     /// <summary>

@@ -4,6 +4,10 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.EventSystems;
 
+/// <summary>
+/// 210522 お店制御用クラス
+/// TODO 製作途中
+/// </summary>
 public class ShopManager : MonoBehaviour
 {
 
@@ -17,6 +21,8 @@ public class ShopManager : MonoBehaviour
     //武器一覧のアセットファイル
     [SerializeField]
     WeaponDatabase weaponDatabase;
+
+    //UI制御
     [SerializeField]
     GameObject buyWindow;
     [SerializeField]
@@ -30,7 +36,7 @@ public class ShopManager : MonoBehaviour
 
 
     //　お店のウィンドウ全部をSerializeFieldに入れていく
-    //cashWindowは除外＾＾；
+    //TODO 細かい制御が出来なくて不便なので消す
     [SerializeField]
     private GameObject[] windowLists;
 
@@ -69,7 +75,6 @@ public class ShopManager : MonoBehaviour
         confirmWindow.GetComponent<ConfirmWindow>().init(this);
     }
 
-    // Update is called once per frame
     void Update()
     {
         //プレー時間更新
@@ -266,7 +271,7 @@ public class ShopManager : MonoBehaviour
             Item purchasedWeapon = new Item(weapon);
             
             //インベントリにアイテム追加
-            itemInventory.addItem(purchasedWeapon);
+            itemInventory.AddItem(purchasedWeapon);
 
         }
 

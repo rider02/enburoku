@@ -5,13 +5,18 @@ using UnityEngine.UI;
 using System.Linq;
 using DG.Tweening;
 
-//立ち絵のクラス
+/// <summary>
+/// 210522 立ち絵のクラス(戦闘マップ用)
+/// </summary>
 public class BattleCharacter : MonoBehaviour {
 
     private GameObject charactorObject;
+
+    //キャラの立ち絵
     private Image charactorImage;
+
+    //キャラの立ち絵一覧
     private Dictionary<string, Sprite> sprites = new Dictionary<string, Sprite>();
-    private CanvasGroup canvasGroup;
 
     public string Name { get; private set; }
     
@@ -33,13 +38,12 @@ public class BattleCharacter : MonoBehaviour {
         var temp = Resources.LoadAll<Sprite>("Image/Charactors/"+Name).ToList();
         foreach (Sprite sprite in temp)
         {
-            //DictionaryはMapのような物 Sprite型とか分からん
             sprites.Add(sprite.name, sprite);
         }
     }
 
-    ////SceneReaderで「#image_hiroko=aseri」が有った時に
-    //SceneControllerの199行目、LoadImageから呼ばれる
+    ////SceneReaderで「#image_hiroko=aseri」等が有った時に
+    //SceneControllerから呼ばれ、画像を設定する
     public void SetImage(string imageID)
     {
         //imageIdは「aseri」、「smile」とかそんな感じ
@@ -52,12 +56,14 @@ public class BattleCharacter : MonoBehaviour {
 
     }
 
+    //フェードイン
     public void Appear()
     {
         charactorObject.SetActive(true);
         FadeIn();
     }
 
+    //立ち絵をフェードアウトし、インスタンスも削除する
     public void Leave()
     {
         FadeOut();

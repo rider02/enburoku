@@ -8,7 +8,6 @@ using UnityEngine.EventSystems;
 public class TitleManager : MonoBehaviour
 {
 
-    [SerializeField] BGMPlayer bgmPlayer;
     [SerializeField] GameObject pressAnyButtonText;
     [SerializeField] GameObject menuWindow;
     [SerializeField] FadeInOutManager fadeInOutManager;
@@ -25,13 +24,27 @@ public class TitleManager : MonoBehaviour
 
     private TitleMode mode = TitleMode.TITLE;
 
-    
+    //BGMプレイヤー
+    BGMPlayer bgmPlayer;
 
     void Start()
     {
+        GameObject bgmManager = GameObject.Find("BGMManager");
+        if (bgmManager == null)
+        {
+            bgmManager = (Instantiate(Resources.Load("Prefabs/BGMManager")) as GameObject);
+            bgmManager.name = bgmManager.name.Replace("(Clone)", "");
+
+        }
+        bgmPlayer = bgmManager.GetComponent<BGMPlayer>();
+
         //BGM再生
-        bgmPlayer.ChangeBGM(BGMType.TITLE);
-        bgmPlayer.PlayBGM();
+        if (BGMType.TITLE != bgmPlayer.playingBGM)
+        {
+            bgmPlayer.ChangeBGM(BGMType.TITLE);
+            bgmPlayer.PlayBGM();
+        }
+        
         fadeInOutManager.FadeinStart();
 
         //複数シーンで存在するので、取得しておく
@@ -43,10 +56,11 @@ public class TitleManager : MonoBehaviour
         //続きからボタンを作成
         saveAndLoadManager.createSaveAndLoadButton();
 
-        //210513 キーコンフィグ初期化
+        //210513 ファイルからキーコンフィグ初期化
         string configFilePath = Application.persistentDataPath + "/keyConfig";
         keyConfigManager = new KeyConfigManager(this, configFilePath);
 
+        //キーコンフィグのUI初期化
         keyConfigManager.CreateConfigButtonList(keyConfigWindow);
         
     }
@@ -64,14 +78,12 @@ public class TitleManager : MonoBehaviour
         if (mode == TitleMode.TITLE)
         {
 
-            //Start、決定、キャンセルボタンのいずれかが押されたら
+            //Start、決定、キャンセルボタンのいずれかが押されたら「PRESS ANY BUTTON」文字を非表示にしてメニュー表示
             if (KeyConfigManager.GetKeyDownAny() || Input.GetButtonDown("Submit"))
             {
-                //文字を非表示にしてメニュー表示
                 pressAnyButtonText.SetActive(false);
                 menuWindow.SetActive(true);
-                mode = TitleMode.MENU;
-                Debug.Log($"mode : {mode.GetStringValue()}");
+                SetTitleMode(TitleMode.MENU);
 
                 EventSystem.current.SetSelectedGameObject(menuWindow.transform.Find("StartButton").gameObject);
             }
@@ -85,13 +97,13 @@ public class TitleManager : MonoBehaviour
         {
             //メニュー画面表示後
 
-            //210513 決定ボタンを押したらUGUIのボタンをクリック
+            //210513 キーコンフィグした決定ボタンを押したらUGUIのボタンをクリックする処理
             if (KeyConfigManager.GetKeyDown(KeyConfigType.SUBMIT))
             {
                 KeyConfigManager.ButtonClick();
             }
 
-            //ロード画面、キーコンフィグ表示中二キャンセルボタンを押すとタイトルメニューに戻る
+            //ロード画面、キーコンフィグ表示中にキャンセルボタンを押すとタイトルメニューに戻る
             if (KeyConfigManager.GetKeyDown(KeyConfigType.CANCEL) || Input.GetButtonDown("Cancel"))
             {
                 if(mode == TitleMode.LOAD || mode == TitleMode.DELETE)
@@ -103,8 +115,7 @@ public class TitleManager : MonoBehaviour
                     CloseKeyConfigWindow();
                 }
 
-                mode = TitleMode.MENU;
-                Debug.Log($"mode : {mode.GetStringValue()}");
+                SetTitleMode(TitleMode.MENU);
             }
         }
     }
@@ -113,8 +124,6 @@ public class TitleManager : MonoBehaviour
     {
         //ロードウィンドウ非表示、メニューウィンドウ表示
         loadWindow.SetActive(false);
-        menuWindow.SetActive(true);
-
         CommonCloseWindow();
     }
 
@@ -123,7 +132,6 @@ public class TitleManager : MonoBehaviour
     {
         //キーコンフィグ非表示、メニューウィンドウ表示
         keyConfigWindow.SetActive(false);
-        menuWindow.SetActive(true);
 
         //閉じる時にキーコンフィグ設定を保存
         string configFilePath = Application.persistentDataPath + "/keyConfig";
@@ -132,12 +140,12 @@ public class TitleManager : MonoBehaviour
         CommonCloseWindow();
     }
 
-    //ウィンドウを閉じる時の共通処理
+    //ロード、コンフィグでウィンドウを閉じる時の共通処理
     private void CommonCloseWindow()
     {
-        mode = TitleMode.MENU;
-        Debug.Log($"mode : {mode.GetStringValue()}");
+        SetTitleMode(TitleMode.MENU);
 
+        menuWindow.SetActive(true);
         //フォーカス変更
         EventSystem.current.SetSelectedGameObject(menuWindow.transform.Find("StartButton").gameObject);
     }
@@ -147,8 +155,7 @@ public class TitleManager : MonoBehaviour
     {
         //ボタンを押した時の処理をロードに変更
         saveAndLoadManager.mode = FileControlMode.LOAD;
-        mode = TitleMode.LOAD;
-        Debug.Log($"mode : {mode.GetStringValue()}");
+        SetTitleMode(TitleMode.LOAD);
 
         CommonOpenWindow();
     }
@@ -158,8 +165,7 @@ public class TitleManager : MonoBehaviour
     {
         //ボタンを押した時の処理をロードに変更
         saveAndLoadManager.mode = FileControlMode.DELETE;
-        mode = TitleMode.DELETE;
-        Debug.Log($"mode : {mode.GetStringValue()}");
+        SetTitleMode(TitleMode.DELETE);
 
         CommonOpenWindow();
     }
@@ -184,17 +190,14 @@ public class TitleManager : MonoBehaviour
 
         EventSystem.current.SetSelectedGameObject(keyConfigWindow.transform.Find("ConfigButton0").gameObject);
 
-        mode = TitleMode.KEY_CONFIG;
-        Debug.Log($"mode : {mode.GetStringValue()}");
-        
+        SetTitleMode(TitleMode.KEY_CONFIG);
     }
 
     //キー入力受付モードにする
     public void KeyAssignReceipt()
     {
-        mode = TitleMode.KEY_ASSIGN_RECEIPT;
+        SetTitleMode(TitleMode.KEY_ASSIGN_RECEIPT);
         KeyAssignWindow.SetActive(true);
-        Debug.Log($"mode : {mode.GetStringValue()}");
     }
 
     //キーの割り当て終了
@@ -204,14 +207,19 @@ public class TitleManager : MonoBehaviour
         KeyAssignWindow.SetActive(false);
 
         //モードを戻す
-        mode = TitleMode.KEY_CONFIG;
-        Debug.Log($"mode : {mode.GetStringValue()}");
+        SetTitleMode(TitleMode.KEY_CONFIG);
 
         //uGUIのフォーカスを戻す
         EventSystem.current.SetSelectedGameObject(selectedButton);
 
     }
 
+    //タイトル画面のモードを設定する
+    private void SetTitleMode(TitleMode destMode)
+    {
+        this.mode = destMode;
+        Debug.Log($"mode : {mode.GetStringValue()}");
+    }
 
 
     //「初めから」ボタンクリック時等 シーン変更

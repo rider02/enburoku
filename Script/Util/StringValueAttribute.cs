@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using System;
+﻿using System;
 
 /// <summary>
 /// Enumに文字列を付加するためのAttributeクラス

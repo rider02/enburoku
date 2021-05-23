@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
-//テキストを元にSceneHolderのParseメソッドから作られる
+/// <summary>
+/// テキストを読み込んでシーンを1行ずつstring型のリストとして保持するクラス
+/// SceneHolderクラスのList<Scene> Scenesに格納されて使用する
+/// </summary>
 public class Scene
 {
     //#scene=001なら001を取得する
@@ -21,7 +19,7 @@ public class Scene
         this.ID = ID;
     }
 
-    //sceneControllerのSetSceneから呼ばれる。何の為？
+    //sceneControllerのSetSceneから呼ばれる
     public Scene Clone()
     {
         //Indexを初期化してインスタンス作り直し
@@ -32,7 +30,7 @@ public class Scene
         };
     }
 
-    //行数がLinesリストのサイズ以上なら終わり
+    //最後まで読んだか 行数がLinesリストのサイズ以上なら終わり
     public bool IsFinished()
     {
         return Index >= Lines.Count;

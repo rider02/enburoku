@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 
 /// <summary>
-/// マップ一覧を作成する
-/// UnitDatabaseとほぼ同じ
+/// マップの地形データ
+/// アセットファイル化してステージ毎に読み込んで使用する
 /// </summary>
 public class MapData : ScriptableObject
 {

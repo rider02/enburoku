@@ -1,14 +1,12 @@
-﻿using System;
-
-/// <summary>
+﻿/// <summary>
 /// ゲームの進行状況
 /// </summary>
 public enum Chapter
 {
     //メタ情報で表示名を設定すること
-    [ChapterValue("異変の幕開け")]
-    [StringValue("博麗神社")]
-    [ReimuRoute(true)]
+    [ChapterValue("異変の幕開け")]      //章題
+    [StringValue("博麗神社")]           //場所 ステージ選択用
+    [ReimuRoute(true)]                  //霊夢ルートか
     STAGE1 = 1,
 
     [ChapterValue("夢幻夜行絵巻 ～ Mystic Flier")]

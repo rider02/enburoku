@@ -3,6 +3,10 @@ using UnityEditor;
 using System.Collections.Generic;
 using System.Linq;
 
+/// <summary>
+/// 職業ScriptabeleObject製作用クラス
+/// Unity上部の「Create」から使用する
+/// </summary>
 public static class JobDatabaseCreator
 {
 
@@ -527,7 +531,7 @@ public static class JobDatabaseCreator
         job = new Job(jobName, jobLevel, skills, classChangeDestination, weaponTypes, statusDto, growthRateDto, move);
         jobDatabase.jobList.Add(job);
 
-        //ツィルノ
+        //チルノ
         jobName = JobName.湖上の氷精;
         jobLevel = JobLevel.NOVICE;
 
@@ -1610,7 +1614,7 @@ public static class JobDatabaseCreator
         job = new Job(jobName, jobLevel, skills1, classChangeDestination, weaponTypes, statusDto, growthRateDto, move);
         jobDatabase.jobList.Add(job);
 
-        //以下、敵専用クラス ルールとしてステータス補正は行う
+        //以下、敵専用クラス ルールとしてステータス補正は行い、上級職はステータス増加させる
         //成長率の参照はしない
         //スキルはこれで管理する
         jobName = JobName.妖精;

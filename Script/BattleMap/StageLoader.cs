@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 210302 ステージの読み込みを行うクラス 内容が長くなってきたので本クラスに記載
+/// 210302 ステージの読み込みを行うクラス
 /// </summary>
 public class StageLoader : MonoBehaviour
 {

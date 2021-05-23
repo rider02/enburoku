@@ -8,32 +8,19 @@ using UnityEngine.UI;
 /// </summary>
 public class UnitButton : MonoBehaviour
 {
-    //ボタン配下のテキスト
-    [SerializeField]
-    public Text buttonText;
-
-    [SerializeField]
-    private Image unitImage;
-
+    
+    [SerializeField] public Text buttonText;    //ユニット名
+    [SerializeField] private Image unitImage;   //ユニット画像
     private StatusManager statusManager;
-
-    //210221 押してユニットのチュートリアルを開く時、画像と種族を取り出す為に持たせておく
-    private string pathName;
 
     //初期化メソッド
     public void Init(string unitName, StatusManager statusManager ,string pathName)
     {
-        //配下のテキストを変更
+        //配下のテキスト、画像を変更
         buttonText.text = unitName;
-        //Prefubは自分配下以外は[SerializeField]出来ないので、
-        //初期化時にインスタンスを渡して貰う
-        this.statusManager = statusManager;
-
-        this.pathName = pathName;
-
-        //210221 旧ユニットボタンがダサすぎたので更新
         this.unitImage.sprite = Resources.Load<Sprite>("Image/ButtonImage/" + pathName);
 
+        this.statusManager = statusManager;
     }
 
     //クリックされた時
@@ -56,7 +43,7 @@ public class UnitButton : MonoBehaviour
         if (statusManager.menuMode == MenuMode.STATUS)
         {
             //ボタン名からステータスウィンドウの文字列をユニット名に変更
-            statusManager.setStatusWindowText(buttonText.text);
+            statusManager.SetStatusWindowText(buttonText.text);
             statusManager.OpenWindow("StatusWindow");
             statusManager.menuMode = MenuMode.STATUS_BROWSE;
         }
@@ -98,8 +85,6 @@ public class UnitButton : MonoBehaviour
         else if (statusManager.menuMode == MenuMode.ITEM_EXCHANGE_TARGET_SELECT)
         {
             //アイテムを交換する対象キャラを選択した時
-
-            
             statusManager.OpenItemExchangeWindow(buttonText.text);
         }
     }

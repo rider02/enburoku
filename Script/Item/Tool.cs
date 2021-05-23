@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-/// <summary>
+﻿/// <summary>
 /// 金塊、鍵、クラスチェンジアイテムなど
 /// </summary>
 //System.Serializableを設定しないと、データを保持できない(シリアライズできない)ので注意

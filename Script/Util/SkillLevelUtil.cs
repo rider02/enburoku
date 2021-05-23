@@ -1,11 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 210218 スキルレベルアップの良い方法が無くて作らざるを得なかった
+/// 210218 スキルレベルアップの処理が結構複雑なのでUtil化
 /// </summary>
-public class SkillLevelUtil : MonoBehaviour
+public static class SkillLevelUtil
 {
     /// <summary>
     /// 210218 スキルレベルの計算を行う

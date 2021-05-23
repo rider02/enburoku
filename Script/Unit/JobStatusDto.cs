@@ -1,17 +1,12 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-/// <summary>
+﻿/// <summary>
 /// 200713
 /// Jobクラスに持たせる ステータス一覧
 /// </summary>
 [System.Serializable]
 public class JobStatusDto
 {
-    /// <summary>
-    /// 職業のステータス補正
-    /// </summary>
+    // 職業のステータス補正
+    
     //HP
     public int jobHp;
 

@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-
+/// <summary>
+/// セルの種類を表示するクラス
+/// </summary>
 
 public class CellTypeView : MonoBehaviour
 {

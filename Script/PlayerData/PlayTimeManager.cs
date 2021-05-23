@@ -6,32 +6,15 @@ using UnityEngine;
 /// プレー時間を加算してセーブデータ等に表示する
 /// これからはUpdateTextを呼び出さず、ウィンドウから呼び出す
 /// </summary>
-public class PlayTimeManager : MonoBehaviour
+public static class PlayTimeManager
 {
-
-    //時
-    public static int hour;
-
-    //分
-    public static int minute;
-
-    //秒
-    private static float seconds;
-
-    public static bool isTimeInit;
-
-    //初期化
-    public static void init()
-    {
-        hour = 0;
-        minute = 0;
-        seconds = 0f;
-
-        isTimeInit = true;
-    }
+    public static int hour;         //時
+    public static int minute;       //分
+    private static float seconds;   //秒
 
     public static void TimeUpdate()
     {
+        //時間を更新
         seconds += Time.deltaTime;
         
         //秒が60になれば分を更新

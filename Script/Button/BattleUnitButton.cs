@@ -4,8 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// UnitButtonと似ているが、流石にステータス画面と共通化は難しいので
-/// 別クラスで実装してしまう
+/// 210522 戦闘テストで戦うユニットを選択する為のボタン
+/// テスト画面用で本編では使わない
 /// </summary>
 public class BattleUnitButton : MonoBehaviour
 {
@@ -19,10 +19,8 @@ public class BattleUnitButton : MonoBehaviour
     //初期化メソッド
     public void Init(string unitName, BattleManager battleManager)
     {
-        //配下のテキストを変更
+        //ボタンにユニットの名前を設定
         buttonText.text = unitName;
-        //Prefubは自分配下以外は[SerializeField]出来ないので、
-        //初期化時にインスタンスを渡して貰う
         this.battleManager = battleManager;
     }
 
@@ -31,9 +29,6 @@ public class BattleUnitButton : MonoBehaviour
     {
         //選択したユニット名を渡す
         battleManager.selectedUnitName = buttonText.text;
-        //ウィンドウを開く
-        //210215 戦闘テスト出来なくなったので改修が必要
-        //battleManager.openWeaponWindow(buttonText.text);
     }
 
     //選択された時に実行

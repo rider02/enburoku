@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// 210522 戦闘テストで武器を選択する為のボタン
+/// テスト画面用で本編では使わない
+/// </summary>
 public class BattleWeaponButton : MonoBehaviour
 {
     //武器名
@@ -20,8 +24,6 @@ public class BattleWeaponButton : MonoBehaviour
         weaponNameText.text = weapon.name;
         enduranceText.text = string.Format("{0}/{1}", weapon.endurance.ToString(), weapon.maxEndurance.ToString());
 
-        //Prefubは自分配下以外は[SerializeField]出来ないので、
-        //初期化時にインスタンスを渡して貰う
         this.battleManager = battleManager;
     }
 
@@ -29,7 +31,7 @@ public class BattleWeaponButton : MonoBehaviour
     {
         battleManager.setEquipWeapon(weaponNameText.text);
 
-        battleManager.OpenEnemyWindow();
+        //battleManager.OpenEnemyWindow();
     }
 
     public void OnSelect()

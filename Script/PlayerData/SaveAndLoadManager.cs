@@ -3,23 +3,23 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 
 /// <summary>
-/// 200711 セーブ、ロードを行うクラス
+/// 200711 セーブ、ロード、データ削除を行うクラス
+/// タイトル画面、ステータス画面で使用する
 /// </summary>
 public class SaveAndLoadManager : MonoBehaviour
 {
-    StatusManager statusManager;
-
-    [SerializeField]
-    private GameObject saveAndLoadWindow;
-
-    private UnitController unitController;
+    //セーブ、ロード、削除するデータを表示するUI
+    [SerializeField] private GameObject saveAndLoadWindow;
 
     FadeInOutManager fadeInOutManager;
 
+    //ファイル名
     private string filename { get; set; }
 
+    //ファイルのパス
     private string saveFilePath;
 
+    //初期化メソッド
     public void Init(FadeInOutManager fadeInOutManager)
     {
         this.fadeInOutManager = fadeInOutManager;
@@ -100,7 +100,7 @@ public class SaveAndLoadManager : MonoBehaviour
                 SavePlayerData saveData = (SavePlayerData)bf.Deserialize(file);
                 
                 //読み込んだデータを各プレイヤーデータに反映
-                                //ユニットの状態
+                //ユニットの状態
                 UnitController.unitList = saveData.unitList;
                 UnitController.isInit = true;
 
@@ -119,7 +119,6 @@ public class SaveAndLoadManager : MonoBehaviour
                 //時間
                 PlayTimeManager.hour = saveData.hour;
                 PlayTimeManager.minute = saveData.minute;
-                PlayTimeManager.isTimeInit = true;
 
                 //ルート、難易度、モード
                 ModeManager.route = saveData.route;

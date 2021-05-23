@@ -4,6 +4,7 @@ using UnityEngine;
 
 /// <summary>
 /// ステージの出撃可能人数、出撃画面フラグ、ユニットの座標を管理するクラス
+/// アセットファイルStageDatabaseで管理
 /// </summary>
 [System.Serializable]
 public class Stage

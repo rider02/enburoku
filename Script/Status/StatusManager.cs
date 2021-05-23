@@ -6,7 +6,9 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 
-
+/// <summary>
+/// ステータス画面を制御するクラス
+/// </summary>
 public class StatusManager : MonoBehaviour
 {
 
@@ -14,87 +16,78 @@ public class StatusManager : MonoBehaviour
     [SerializeField]
     private GameObject[] windowLists;
 
-    //現在表示しているウィンドウ
-    [SerializeField] GameObject cullentWindow;
-    [SerializeField] UnitController unitController;
-    [SerializeField] CashManager cashManager;
-    [SerializeField] PlayTimeManager playTimeManager;
-    [SerializeField] FadeInOutManager fadeInOutManager;
-    [SerializeField] TalkManager talkManager;
-    [SerializeField] TimeWindow timeWindow;
-    [SerializeField] ChapterManager chapterManager;
-    [SerializeField] SaveAndLoadManager saveAndLoadManager;
-    [SerializeField] ClassChangeManager classChangeManager;
-    [SerializeField] ModeManager modeManager;
-    [SerializeField] UnitOutlineWindow unitOutlineWindow;
-    [SerializeField] ModeWindow modeWindow;
-    [SerializeField] Image characterImage;
-    [SerializeField] Image backGroundImage;
-    [SerializeField] GameObject menuWindow;
+    [SerializeField] GameObject cullentWindow;              //現在表示しているウィンドウ
+    [SerializeField] UnitController unitController;         //ユニット一覧
+    [SerializeField] CashManager cashManager;               //お金の制御
+    [SerializeField] FadeInOutManager fadeInOutManager;     //フェードイン、フェードアウト制御
+    [SerializeField] TalkManager talkManager;               //支援会話制御
+    [SerializeField] TimeWindow timeWindow;                 //プレー時間制御
+    [SerializeField] SaveAndLoadManager saveAndLoadManager; //セーブ、ロード
+    [SerializeField] ClassChangeManager classChangeManager; //クラスチェンジ
+    [SerializeField] ModeManager modeManager;               //ルート、難易度、敗北ユニットの処理
+    [SerializeField] UnitOutlineWindow unitOutlineWindow;   //ユニットを選択した時の概要ウィンドウ
+    [SerializeField] ModeWindow modeWindow;                 //左上に「ステータス」、「装備」等モードを表示するウィンドウ
+    [SerializeField] Image characterImage;                  //霊夢かレミリアの立ち絵
+    [SerializeField] Image backGroundImage;                 //背景画像
+    [SerializeField] GameObject menuWindow;                 //メニューウィンドウ
 
-    [SerializeField] LvUpManager lvUpManager;
-    [SerializeField] ItemInventory itemInventory;
-    [SerializeField] GameObject itemDepositWindow;
-    [SerializeField] GameObject inventoryWindow;
+    [SerializeField] LvUpManager lvUpManager;               //レベルアップ制御
+    [SerializeField] ItemInventory itemInventory;           //アイテム倉庫
+    [SerializeField] GameObject itemDepositWindow;          //アイテムを預けるウィンドウ
+    [SerializeField] GameObject inventoryWindow;            //倉庫ウィンドウ
 
     [SerializeField] GameObject detailView;
-    [SerializeField] GameObject statusDetailView;
-    [SerializeField] GameObject weaponDetailWindow;
-    [SerializeField] GameObject itemDetailWindow;
-    [SerializeField] GameObject statusWeaponDetailWindow;
-    [SerializeField] GameObject statusItemDetailWindow;
-    [SerializeField] GameObject statusSkillDetailWindow;
-    [SerializeField] UseItemManager useItemManager;
+    [SerializeField] GameObject statusDetailView;           //ステータス詳細ウィンドウ
+    [SerializeField] GameObject weaponDetailWindow;         //武器詳細ウィンドウ
+    [SerializeField] GameObject itemDetailWindow;           //道具詳細ウィンドウ
+    [SerializeField] GameObject statusWeaponDetailWindow;   //ステータス画面時の武器詳細ウィンドウ
+    [SerializeField] GameObject statusItemDetailWindow;     //ステータス画面時の道具詳細ウィンドウ
+    [SerializeField] GameObject statusSkillDetailWindow;    //ステータス画面時のスキル詳細ウィンドウ
+    [SerializeField] UseItemManager useItemManager;         //道具使用制御
 
-    //200724 転職先の詳細を表示するウィンドウ
-    [SerializeField] GameObject classChangeDetailWindow;
-
+    [SerializeField] GameObject classChangeDetailWindow;    //転職先の詳細を表示するウィンドウ
     [SerializeField] GameObject messageWindow;
 
     //　自身の親のCanvasGroup
     private CanvasGroup canvasGroup;
-    //　200726 戻るボタンを押した時のオブジェクト選択
+    //　200726 戻るボタンを押した時フォーカスするオブジェクト保持
     public GameObject returnButton;
 
-    //210207 戻るボタンを押した時のオブジェクト選択(ネストしたUI用)
+    //210207 戻るボタンを押した時フォーカスするオブジェクト保持(ネストしたUI用)
     public GameObject nestedReturnButton;
 
-    //210221 チュートリアルのネストは3段階なので作成 クソ実装
+    //210221 チュートリアルのネストは3段階なので更に作成
     public GameObject tutorialnestedReturnButton;
 
+    //アイテム交換関連
     //2人目のアイテム交換対象
     public GameObject exchangeTargetUnitButton;
 
-    //210222 アイテムの交換を行うユニットの名前 対象はUnitButtonから渡されるので控える必要は無い
+    //210222 アイテムの交換を行うユニットの名前
     Unit itemControllUnit;
-
     Unit itemExchangeUnit;
 
-    //交換するアイテムを本クラスに控えておく アイテム交換はデカいので、別クラスにまとめても良い？
+    //交換するアイテムを保持
     Item exchangeItem;
-
     int exchangeItemIndex;
-
-    //預けるアイテムをtmpさせておく
+    
+    //預ける関連
+    //預けるアイテムを保持
     Item depositItem;
 
     //「預ける」ウィンドウ表示時にキャンセルを押した時フォーカスを戻す先
     GameObject depositItemButton;
-
     int depositItemButtonIndex;
-
-    private UnitDatabase unitDatabase;
-
-    private JobDatabase jobDatabase;
-
+    
+    //各アセットファイル
+    UnitDatabase unitDatabase;
+    JobDatabase jobDatabase;
     WeaponDatabase weaponDatabase;
-
     PotionDatabase potionDatabase;
-
     AccessoryDatabase accessoryDatabase;
-
     ToolDatabase toolDatabase;
 
+    //BGMプレイヤー
     BGMPlayer bgmPlayer;
 
     //210208 シーンをまたがる効果音再生用
@@ -116,6 +109,7 @@ public class StatusManager : MonoBehaviour
     List<StatusType> lvUpList;
     Unit lvupUnit;
 
+    //ステータス画面の状態
     public MenuMode menuMode {get; set; }
 
     void Start()
@@ -138,10 +132,6 @@ public class StatusManager : MonoBehaviour
         saveAndLoadManager.Init(fadeInOutManager);
 
         canvasGroup = GetComponentInParent<CanvasGroup>();
-        //returnButton = transform.parent.Find("Exit").gameObject;
-
-        //ユニット一覧初期化
-        //unitController.initData();
 
         //支援会話リスト初期化
         talkManager.init(this);
@@ -149,25 +139,21 @@ public class StatusManager : MonoBehaviour
         //unitDatabase初期化
         unitDatabase = Resources.Load<UnitDatabase>("unitDatabase");
 
-        //200724 jobDatabase初期化
+        //200724 各データベース初期化
         jobDatabase = Resources.Load<JobDatabase>("jobDatabase");
-
         weaponDatabase = Resources.Load<WeaponDatabase>("weaponDatabase");
-
         potionDatabase = Resources.Load<PotionDatabase>("potionDatabase");
-
         toolDatabase = Resources.Load<ToolDatabase>("toolDatabase");
-
         accessoryDatabase = Resources.Load<AccessoryDatabase>("AccessoryDatabase");
 
         //仲間ユニット一覧初期化
         if (!UnitController.isInit) {
 
-            unitController.initUnitList(unitDatabase);
+            unitController.InitUnitList(unitDatabase);
         }
 
         //ユニットボタン作成
-        unitController.initPartyList(this);
+        unitController.InitPartyList(this);
 
         //201719 クラスチェンジ機能初期化
         classChangeManager.Init(this, jobDatabase, unitController);
@@ -180,19 +166,13 @@ public class StatusManager : MonoBehaviour
         }
         cashManager.UpdateText();
 
-        //時間を初期化
-        if (!PlayTimeManager.isTimeInit)
-        {
-            PlayTimeManager.init();
-        }
-
         //時間ウィンドウを初期化
         timeWindow.init();
 
         //進行度初期化
         if (!ChapterManager.isChapterInit)
         {
-            chapterManager.Init();
+            ChapterManager.Init();
         }
 
         //初期化されていなければ手持ちアイテムリスト初期化
@@ -201,7 +181,7 @@ public class StatusManager : MonoBehaviour
             itemInventory.Init();
         }
 
-        //20200712 モードを初期化は、設定しないと列挙型なのでカジュアル、霊夢ルート、ノーマルとなる
+        //20200712 モードを初期化は、設定しないと列挙型なのでカジュアル、霊夢ルート、ノーマルとなるので不要
 
         //210514 キーコンフィグ初期化
         if (KeyConfigManager.configMap == null)
@@ -237,15 +217,18 @@ public class StatusManager : MonoBehaviour
         //効果音再生用
         audioSource = GameObject.Find("BGMManager").GetComponent<AudioSource>();
 
-        //210221 ステータス画面に戻ってくると仲間全員のHP回復
+        //210221 ステータス画面に戻ってくると仲間全員のHP回復 
         Rest();
 
         fadeInOutManager.FadeinStart();
     }
 
-    // Update is called once per frame
     void Update()
     {
+        //時間を更新
+        PlayTimeManager.TimeUpdate();
+        timeWindow.UpdateTime();
+
         //210207 暗転中は操作しない
         if (fadeInOutManager.isFadeinFadeout())
         {
@@ -262,56 +245,26 @@ public class StatusManager : MonoBehaviour
             isInitFinish = true;
         }
 
-        //時間を更新
-        PlayTimeManager.TimeUpdate();
-        timeWindow.UpdateTime();
-
-
-        //〇ボタン
+        //決定ボタン
         if (KeyConfigManager.GetKeyDown(KeyConfigType.SUBMIT))
         {
-            //いつでもUGUIのボタンクリックは優先する
-            KeyConfigManager.ButtonClick();
-
-            if (menuMode == MenuMode.LVUP_END)
-            {
-                //レベルアップ完了時
-                //レベルアップウィンドウと感想のウィンドウを閉じる
-                lvUpManager.closeLvupWindow();
-
-                //元の状態へ
-                menuMode = MenuMode.LVUP;
-                Debug.Log($"menuMode:{menuMode}");
-
-                return;
-            }
-            //メッセージウィンドウが表示され、ボタンを選択されていない時のみウィンドウを閉じる
-            if (ismassageActive)
-            {
-                //CloseMessageWindow();
-                return;
-            }
-            else
-            {
-                return;
-            }
+            SubmitButton();
         }
 
-        if (KeyConfigManager.GetKeyDown(KeyConfigType.MENU))
+        //メニューボタン
+        if (KeyConfigManager.GetKeyDown(KeyConfigType.MENU) || Input.GetButtonDown("Menu"))
         {
             MenuButton();
         }
 
         //キャンセルボタン
-        if (KeyConfigManager.GetKeyDown(KeyConfigType.CANCEL))
+        if (KeyConfigManager.GetKeyDown(KeyConfigType.CANCEL) || Input.GetButtonDown("Cancel"))
         {
 
             CancelButton();
         }
 
-
-
-        //210223 どうしてもアイテム交換でフォーカスが消滅する処理を解決出来なかった為
+        //210223 アイテム交換でボタン更新中にフォーカスが消滅してしまった場合
         if(menuMode == MenuMode.ITEM_EXCHANGE)
         {
             if(EventSystem.current.currentSelectedGameObject == null)
@@ -350,11 +303,48 @@ public class StatusManager : MonoBehaviour
 
     }
 
+    //モードのセットとログ出力
+    public void SetMenuMode(MenuMode menuMode)
+    {
+        this.menuMode = menuMode;
+        Debug.Log($"menuMode:{menuMode}");
+    }
+
+    //決定ボタン
+    public void SubmitButton()
+    {
+        //いつでもUGUIのボタンクリックは優先する
+        KeyConfigManager.ButtonClick();
+
+        if (menuMode == MenuMode.LVUP_END)
+        {
+            //レベルアップ完了時
+            //レベルアップウィンドウと感想のウィンドウを閉じる
+            lvUpManager.closeLvupWindow();
+
+            //元の状態へ
+            SetMenuMode(MenuMode.LVUP);
+            return;
+        }
+        //メッセージウィンドウが表示され、ボタンを選択されていない時のみウィンドウを閉じる
+        if (ismassageActive)
+        {
+            //CloseMessageWindow();
+            return;
+        }
+        else
+        {
+            return;
+        }
+    }
+
+    //メニューボタン
     public void MenuButton()
     {
         //ステータスウィンドウを開いている時のみ動作する
         if(cullentWindow.name == "StatusWindow")
         {
+
             if (!isDetailVisible)
             {
                 isDetailVisible = true;
@@ -368,12 +358,12 @@ public class StatusManager : MonoBehaviour
                 statusDetailView.SetActive(false);
                 EventSystem.current.SetSelectedGameObject(null);
             }
-            
         }
     }
 
     /// <summary>
-    /// 200724 多過ぎるのでキャンセルボタンを分ける
+    /// 200724 キャンセルボタン
+    /// モードによって色々UI制御を行う
     /// </summary>
     public void CancelButton()
     {
@@ -400,7 +390,7 @@ public class StatusManager : MonoBehaviour
                 statusDetailView.SetActive(false);
                 isDetailVisible = false;
 
-                menuMode = MenuMode.STATUS;
+                SetMenuMode(MenuMode.STATUS);
             }
 
             //キャンセルボタンを押したタイミングで支援リストを削除する
@@ -467,7 +457,7 @@ public class StatusManager : MonoBehaviour
                 //unitOutlineWindow閉じる
                 unitOutlineWindow.gameObject.SetActive(false);
 
-                menuMode = MenuMode.ROOT;
+                SetMenuMode(MenuMode.ROOT);
                 //テキストを更新する
                 modeWindow.UpdateText(menuMode.GetStringValue());
 
@@ -481,8 +471,7 @@ public class StatusManager : MonoBehaviour
             {
                 //210222 アイテムの交換を行うユニットを選択する時
                 //モード変更
-                menuMode = MenuMode.ITEM_MENU;
-                Debug.Log($"menuMode:{menuMode}");
+                SetMenuMode(MenuMode.ITEM_MENU);
 
                 //左上の表示を変更
                 modeWindow.UpdateText(menuMode.GetStringValue());
@@ -509,7 +498,6 @@ public class StatusManager : MonoBehaviour
                 EventSystem.current.SetSelectedGameObject(itemControllWindow.transform.Find("ExchangeItemButton").gameObject);
 
             }
-            
 
         }
         else if (cullentWindow.name == "UnitTutorialListWindow")
@@ -544,7 +532,7 @@ public class StatusManager : MonoBehaviour
         else if (cullentWindow.name == "ItemControlWindow")
         {
             //「持ち物」「交換」「全預け」ボタンを消す
-            menuMode = MenuMode.ITEM_UNIT_SELECT;
+            SetMenuMode(MenuMode.ITEM_UNIT_SELECT);
             cullentWindow.SetActive(false);
 
 
@@ -556,7 +544,7 @@ public class StatusManager : MonoBehaviour
         else if (cullentWindow.name == "WeaponWindow")
         {
             //ユニットの手持ち道具ウィンドウを開いている時
-            menuMode = MenuMode.ITEM_UNIT_SELECT;
+            SetMenuMode(MenuMode.ITEM_UNIT_SELECT);
             GameObject partyWindow = getWindow("PartyWindow");
             partyWindow.SetActive(true);
             cullentWindow = partyWindow;
@@ -573,8 +561,7 @@ public class StatusManager : MonoBehaviour
         {
             //アイテム交換中の時
             //アイテム一覧へ戻す
-            menuMode = MenuMode.ITEM_UNIT_SELECT;
-            Debug.Log($"menuMode:{menuMode}");
+            SetMenuMode(MenuMode.ITEM_UNIT_SELECT);
 
             //アイテム削除
             GameObject itemExchangeWindow = getWindow("ItemExchangeWindow");
@@ -609,16 +596,14 @@ public class StatusManager : MonoBehaviour
         else if (menuMode == MenuMode.EXCHANGE_ITEM_SELECT)
         {
             //1つめのアイテムを選択している時
-            menuMode = MenuMode.ITEM_EXCHANGE;
-            Debug.Log($"menuMode:{menuMode}");
+            SetMenuMode(MenuMode.ITEM_EXCHANGE);
 
             GameObject itemExchangeWindow = getWindow("ItemExchangeWindow");
             itemExchangeWindow.GetComponent<ItemExchangeWindow>().InteractableButton();
         }
         else if (menuMode == MenuMode.ITEM_DEPOSIT_MENU)
         {
-            menuMode = MenuMode.ITEM;
-            Debug.Log($"menuMode:{menuMode}");
+            SetMenuMode(MenuMode.ITEM);
 
             //アイテムを「預ける」、「装備」ウィンドウを表示している時
             //ウィンドウを閉じる
@@ -641,8 +626,7 @@ public class StatusManager : MonoBehaviour
         {
             //隙間からアイテムを受け取る時
             //アイテム一覧まで戻る
-            menuMode = MenuMode.ITEM;
-            Debug.Log($"menuMode:{menuMode}");
+            SetMenuMode(MenuMode.ITEM);
 
             GameObject weaponWindow = getWindow("WeaponWindow");
             cullentWindow = weaponWindow;
@@ -654,9 +638,7 @@ public class StatusManager : MonoBehaviour
             //フォーカスを元のアイテムボタンへ戻す
             EventSystem.current.SetSelectedGameObject(depositItemButton);
         }
-
-        
-    }
+    }//CancelButton
 
     //　ステータス画面のウインドウのオン・オフメソッド
     public void ChangeWindow(GameObject window)
@@ -743,7 +725,7 @@ public class StatusManager : MonoBehaviour
     }
 
     //　他の画面を表示する
-    public void WindowOnOff(GameObject window)
+    private void WindowOnOff(GameObject window)
     {
         if (canvasGroup == null || canvasGroup.interactable)
         {
@@ -756,12 +738,13 @@ public class StatusManager : MonoBehaviour
         EventSystem.current.SetSelectedGameObject(returnButton);
     }
 
-    //ユニット名を元にStatusWindow更新
-    public void setStatusWindowText(string unitName)
+    //ユニットのステータス表示
+    public void SetStatusWindowText(string unitName)
     {
         //名前から対象のユニットを取得
         var unit = unitController.findByName(unitName);
 
+        //ボタン作成処理はStatusWindowクラスに任せる
         var window = getWindow("StatusWindow");
         if(window != null)
         {
@@ -796,14 +779,14 @@ public class StatusManager : MonoBehaviour
     }
 
     /// <summary>
-    /// レベルアップボタンを押すとレベルアップモード
+    /// レベルアップテストモード
     /// </summary>
     public void OpenLvUpWindow()
     {
         returnButton = GameObject.Find("LvUpButton");
 
         //モードを変更
-        menuMode = MenuMode.LVUP;
+        SetMenuMode(MenuMode.LVUP);
 
         OpenWindow("PartyWindow");
 
@@ -834,6 +817,7 @@ public class StatusManager : MonoBehaviour
         EventSystem.current.SetSelectedGameObject(messageWindow.transform.Find("ConfirmButton").gameObject);
     }
 
+    //メッセージウィンドウ非表示
     public void CloseMessageWindow()
     {
 
@@ -865,38 +849,16 @@ public class StatusManager : MonoBehaviour
     }
 
     /// <summary>
-    /// メッセージウィンドウを閉じる 古いクラスチェンジ用ウィンドウなのでコメントアウト
+    /// クラスチェンジ関連
     /// </summary>
-/*    public void CloseMessageWindow()
-    {
-        
-        //クソ実装
-        foreach (var item in windowLists)
-        {
-            if(item.name == "ClassChangeDestinationWindow")
-            {
-                cullentWindow = item;
-            }
-        }
 
-        EventSystem.current.SetSelectedGameObject(cullentWindow.transform.Find("ClassChangeButton").gameObject);
-
-        //メッセージウィンドウ表示フラグ
-        ismassageActive = false;
-        Debug.Log("ismassageActive" + ismassageActive);
-
-        messageWindow.SetActive(false);
-    }*/
-
-    /// <summary>
-    /// 200719 クラスチェンジしたいキャラを選択
-    /// </summary>
+    // 200719 クラスチェンジしたいキャラを選択
     public void OpenClassChangeWindow()
     {
         returnButton = GameObject.Find("JubButton");
 
         //モードを変更
-        menuMode = MenuMode.CLASSCHANGE;
+        SetMenuMode(MenuMode.CLASSCHANGE);
 
         //開くウィンドウはPartyWindowで、処理はUnitButtonに委ねる
         OpenWindow("PartyWindow");
@@ -912,7 +874,7 @@ public class StatusManager : MonoBehaviour
         classChangeManager.CreateClassChangeButton(unit, classChangeDetailWindow.GetComponent<ClassChangeDetailWindow>());
         OpenWindow("ClassChangeDestinationWindow");
 
-        //転職先が存在すれば詳細ウィンドウも表示する
+        //転職先が存在すれば詳細ウィンドウも表示する 最上級職の場合は表示されない
         if ((unit.job.jobLevel != JobLevel.MASTER))
         {
             classChangeDetailWindow.SetActive(true);
@@ -929,6 +891,7 @@ public class StatusManager : MonoBehaviour
 
     /// <summary>
     /// 210222 アイテム交換関連 かなり大掛かりな内容
+    /// TODO 別クラスに分けて整理する ウィンドウ制御が複雑なので、マップ画面と共通処理出来なさそう
     /// </summary>
 
     //210222 アイテム一覧を表示する
@@ -957,15 +920,8 @@ public class StatusManager : MonoBehaviour
         {
             Destroy(obj.gameObject);
         }
-
-
         Unit forcusUnit = unitController.findByName(unitName);
-        
-
         List<Item> itemList = forcusUnit.carryItem;
-
-        //BattleMapManagerのOpenItemWindowを参考に作成
-        //共通化は不活性、フォーカス等が有り、少し難しいと思う
 
         int index = 0;
 
@@ -988,6 +944,7 @@ public class StatusManager : MonoBehaviour
         }
         if (itemList.Count < 6)
         {
+            //6個未満の場合は空のアイテムボタン作成
             int emptyButtonNum = 6 - itemList.Count;
 
             for (int i = 0; i < emptyButtonNum; i++)
@@ -1006,7 +963,6 @@ public class StatusManager : MonoBehaviour
                 weaponButton.GetComponent<Button>().interactable = false;
                 index++;
             }
-
         }
     }
 
@@ -1028,43 +984,8 @@ public class StatusManager : MonoBehaviour
         cullentWindow = itemControllWindow;
         itemControllWindow.transform.position = new Vector3(unitButtonTransform.position.x - ITEM_CONTROL_WINDOW_DISTANCE, unitButtonTransform.position.y - 30, unitButtonTransform.position.z);
 
-
         //フォーカス変更
         EventSystem.current.SetSelectedGameObject(itemControllWindow.transform.Find("CarryItemButton").gameObject);
-    }
-
-    //210222「持ち物」ボタンを押された時の操作
-    public void ControlCarryItem()
-    {
-        menuMode = MenuMode.ITEM;
-        Debug.Log($"menuMode:{menuMode}");
-
-        GameObject weaponWindow = getWindow("WeaponWindow");
-        cullentWindow = weaponWindow;
-
-        //詳細ウィンドウ表示
-        detailView.SetActive(true);
-
-        foreach (Transform weaponButton in weaponWindow.transform)
-        {
-            //ボタンを活性化する
-            weaponButton.GetComponent<Button>().interactable = true;
-        }
-        //フォーカス変更
-        EventSystem.current.SetSelectedGameObject(weaponWindow.transform.Find("StatusItemButton0").gameObject);
-
-
-        //「持ち物」「交換」「全預け」等のウィンドウとユニット一覧を消す
-        GameObject itemControllWindow = getWindow("ItemControlWindow");
-        itemControllWindow.SetActive(false);
-        GameObject partyWindow = getWindow("PartyWindow");
-        partyWindow.SetActive(false);
-
-        //インベントリ内のアイテム更新
-        ReloadInventory();
-
-        inventoryWindow.SetActive(true);
-
     }
 
     //アイテムの交換を行うユニットを選択する
@@ -1463,12 +1384,53 @@ public class StatusManager : MonoBehaviour
 
     }
 
+    //アイテム交換 ここまで
+
+
+
+    /// <summary>
+    /// 倉庫関連
+    /// </summary>
+    //210222「持ち物」ボタンを押された時 倉庫(スキマ)を表示して倉庫に入れたり、装備する処理を開始
+    public void ControlCarryItem()
+    {
+        menuMode = MenuMode.ITEM;
+        Debug.Log($"menuMode:{menuMode}");
+
+        GameObject weaponWindow = getWindow("WeaponWindow");
+        cullentWindow = weaponWindow;
+
+        //詳細ウィンドウ表示
+        detailView.SetActive(true);
+
+        foreach (Transform weaponButton in weaponWindow.transform)
+        {
+            //ボタンを活性化する
+            weaponButton.GetComponent<Button>().interactable = true;
+        }
+        //フォーカス変更
+        EventSystem.current.SetSelectedGameObject(weaponWindow.transform.Find("StatusItemButton0").gameObject);
+
+
+        //「持ち物」「交換」「全預け」等のウィンドウとユニット一覧を消す
+        GameObject itemControllWindow = getWindow("ItemControlWindow");
+        itemControllWindow.SetActive(false);
+        GameObject partyWindow = getWindow("PartyWindow");
+        partyWindow.SetActive(false);
+
+        //インベントリ内のアイテム更新
+        ReloadInventory();
+
+        inventoryWindow.SetActive(true);
+
+    }
+
     /// <summary>
     /// アイテムを預けたり、装備するウィンドウを開く
     /// </summary>
     public void OpenItemDepositWindow(Unit unit,Item item, Transform itemButtonTransform, int index, bool isEquipable)
     {
-        //預けるアイテムをこのクラスに一旦保管 雑過ぎる
+        //預けるアイテムをこのクラスに一旦保管
         itemControllUnit = unit;
 
         //一旦、全てのボタンを非表示にして使うボタンのみ出していく
@@ -1548,7 +1510,7 @@ public class StatusManager : MonoBehaviour
     }
 
     /// <summary>
-    /// アイテムを預ける 交換より遥かに実装早い＾＾；
+    /// アイテムを預ける
     /// </summary>
     /// <param name="item"></param>
     public void DepositItem()
@@ -1567,7 +1529,7 @@ public class StatusManager : MonoBehaviour
         }
         //ユニットの手持ちから消してインベントリへ入れる
         itemControllUnit.carryItem.Remove(depositItem);
-        itemInventory.addItem(depositItem);
+        itemInventory.AddItem(depositItem);
         Debug.Log($"{depositItem.ItemName}を預けました");
 
         //更新
@@ -1716,6 +1678,7 @@ public class StatusManager : MonoBehaviour
 
     }
 
+    //倉庫内のアイテム更新
     private void ReloadInventory()
     {
         //インベントリのアイテム一覧削除
@@ -1743,6 +1706,10 @@ public class StatusManager : MonoBehaviour
             weaponButton.GetComponent<Button>().interactable = false;
         }
     }
+
+    //倉庫 ここまで
+
+
 
     /// <summary>
     /// 武器、アクセサリの装備を行う 「装備」ボタン押下時に呼ばれる
@@ -1826,7 +1793,6 @@ public class StatusManager : MonoBehaviour
         itemDepositWindow.SetActive(false);
 
         //フォーカスを選択したボタンへ戻す
-        //EventSystem.current.SetSelectedGameObject(weaponWindow.transform.Find("StatusItemButton" + depositItemButtonIndex).gameObject);
     }
 
      //アイテム詳細ウィンドウの更新を実施
@@ -1875,6 +1841,7 @@ public class StatusManager : MonoBehaviour
         }
     }
 
+    //ステータス画面の詳細ウィンドウ更新
     public void changeStatusItemDetailWindow(Item item, Transform transform)
     {
         //フォーカスした要素の近くに移動させる
@@ -1958,25 +1925,6 @@ public class StatusManager : MonoBehaviour
         OpenWindow("PartyWindow");
     }
 
-    //200711 セーブウィンドウを開く
-    public void OpenSaveWindow()
-    {
-
-        returnButton = GameObject.Find("SaveButton");
-        menuMode = MenuMode.SAVE;
-        saveAndLoadManager.mode = FileControlMode.SAVE;
-        OpenWindow("SaveAndLoadWindow");
-    }
-
-    //200711 ロードウィンドウを開く
-    public void OpenLoadWindow()
-    {
-        returnButton = GameObject.Find("LoadButton");
-        menuMode = MenuMode.LOAD;
-        saveAndLoadManager.mode = FileControlMode.LOAD;
-        OpenWindow("SaveAndLoadWindow");
-    }
-
     //支援会話リストを表示する
     public void OpenTalkListWindow(string unitName)
     {
@@ -2016,6 +1964,25 @@ public class StatusManager : MonoBehaviour
             EventSystem.current.SetSelectedGameObject(window.transform.Find("reimuPanel/FriendLevelList/udon_reimu_C").gameObject);
         }
 
+    }
+
+    //200711 セーブウィンドウを開く
+    public void OpenSaveWindow()
+    {
+
+        returnButton = GameObject.Find("SaveButton");
+        menuMode = MenuMode.SAVE;
+        saveAndLoadManager.mode = FileControlMode.SAVE;
+        OpenWindow("SaveAndLoadWindow");
+    }
+
+    //200711 ロードウィンドウを開く
+    public void OpenLoadWindow()
+    {
+        returnButton = GameObject.Find("LoadButton");
+        menuMode = MenuMode.LOAD;
+        saveAndLoadManager.mode = FileControlMode.LOAD;
+        OpenWindow("SaveAndLoadWindow");
     }
 
     /// <summary>

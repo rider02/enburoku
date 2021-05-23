@@ -1,10 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-/// <summary>
+﻿/// <summary>
 /// パラメータの種類 レベルアップ時の判定に使う
-/// 210218 これ、武器の補正するステータスの種類にも流用出来る事が判明
+/// 210218 武器やアクセサリの補正するステータスの種類にも流用すること
 /// NONE以外ならバフ
 /// </summary>
 public enum StatusType

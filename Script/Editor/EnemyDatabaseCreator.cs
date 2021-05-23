@@ -3,6 +3,10 @@ using UnityEditor;
 using System.Collections.Generic;
 using System.Linq;
 
+/// <summary>
+/// 敵一覧ScriptabeleObject製作用クラス
+/// Unity上部の「Create」から使用する
+/// </summary>
 public static class EnemyDatabaseCreator
 {
 
@@ -31,7 +35,7 @@ public static class EnemyDatabaseCreator
 
         enemyDatabase.enemyList.Add(new Enemy(name, job, status, isBoss, race, pathName, skillLevelMap));
 
-        //メイド妖精　上級職とのステータス補正は職業に持たせているので、基礎値は同じとなる
+        //メイド妖精　上級職とのステータス補正は職業に持たせているので、基礎値は下級職の妖精と同じとなる
         name = "メイド妖精";
         status = new int[] { 1, 20, 5, 3, 3, 3, 1, 3, 2 };
         job = jobDatabase.FindByJob(JobName.メイド妖精);

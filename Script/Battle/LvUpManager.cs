@@ -4,7 +4,8 @@ using UnityEngine;
 using DG.Tweening;
 
 /// <summary>
-/// レベルアップ判定を行うクラス
+/// レベルアップ判定を行うクラス 戦闘画面の他、
+/// ステータス画面でもテスト用にレベルアップ出来る
 /// </summary>
 public class LvUpManager : MonoBehaviour
 {
@@ -50,6 +51,19 @@ public class LvUpManager : MonoBehaviour
         unitDatabase = Resources.Load<UnitDatabase>("unitDatabase");
     }
 
+    //初期化処理
+    public void InitLvupWindow(Unit unit)
+    {
+
+        //210225 レベルアップのピンピンをカウントする用の変数を初期化
+        index = 0;
+        isImpreShow = false;
+
+        //初期化して表示する
+        lvUpWindow.GetComponent<LvUpWindow>().Init(unit);
+        lvUpWindow.SetActive(true);
+    }
+
     //レベルアップするメソッド 直接Static型のUnitController.unitListを変更
     public List<StatusType> lvup(string lvUpUnitName,int resultExp)
     {
@@ -64,7 +78,7 @@ public class LvUpManager : MonoBehaviour
             //リストの中でレベルアップしたユニットが居れば
             if(unit.name == lvUpUnitName)
             {
-                //名前から成長率を取得　200719　Unitクラスに持たせた方が良いのでは・・・
+                //データベースを名前で検索して成長率を取得
                 GrowthRate growthRate = growthDatabase.FindByName(lvUpUnitName);
 
                 //職業成長率
@@ -97,17 +111,15 @@ public class LvUpManager : MonoBehaviour
                 //210225 LVのピンピン処理に追加
                 lvUpList.Add(StatusType.LV);
 
-                
-                
-
                 //2ピン補正したか否か
+                //2ピン補正：上がったステが2個以下ならHPからループしなおし
                 bool isRetry = false;
-                //2ピン補正 上がったステが2個以下ならHPからループしなおし
+                
+                //レベルアップループ 2つ以上パラメータが成長した時点でbreak
                 while(true)
                 {
-                    //各成長判定 成長率以下なら上がるものとする
+                    //各成長判定 成長率以下の乱数なら+1
                     //HP
-
                     //1～100の値を作成
                     float ran = Random.Range(1.0f, 100.0f);
 
@@ -118,6 +130,7 @@ public class LvUpManager : MonoBehaviour
                         lvUpList.Add(StatusType.HP);
 
                         hpUpped = true;
+                        //2ピン補正時の時は2つパラメータが成長した時点でループ終了
                         if(lvUpList.Count > 2 && isRetry)
                         {
                             break;
@@ -229,6 +242,7 @@ public class LvUpManager : MonoBehaviour
                         }
                     }
 
+                    //2つ以上パラメータが成長していたらループ終了
                     if (lvUpList.Count > 2)
                     {
                         break;
@@ -250,20 +264,7 @@ public class LvUpManager : MonoBehaviour
     }
 
 
-    //初期化するだけ、BattleManagerから直接読んで良くないか？
-    public void InitLvupWindow(Unit unit)
-    {
-        
-        //210225 レベルアップのピンピンをカウントする用の変数を初期化
-        index = 0;
-        isImpreShow = false;
-
-        //初期化して表示する
-        lvUpWindow.GetComponent<LvUpWindow>().Init(unit);
-        lvUpWindow.SetActive(true);
-    }
-
-    //レベルアップウィンドウとインプレウィンドウを閉じる
+    //レベルアップウィンドウと感想ウィンドウを閉じる
     public void closeLvupWindow()
     {
         lvUpWindow.SetActive(false);
@@ -302,6 +303,7 @@ public class LvUpManager : MonoBehaviour
         }
         elapsedTime = 0;
 
+        //UIに反映
         lvUpWindow.GetComponent<LvUpWindow>().UpdateText(lvUpList[index]);
 
         //効果音
@@ -324,7 +326,7 @@ public class LvUpManager : MonoBehaviour
 
         lvupImpreWindow.SetActive(true);
 
-        //もしちゃんとコメントが3種類設定していなかったら最初のコメントを表示
+        //通常有り得ないが、コメントが3種類設定していなかったら最初のコメントを表示
         if (lvUpImpre.lvupImpre.Count !=3)
         {
             lvupImpreWindow.GetComponent<LvupImpreWindow>().UpdateText(lvUpImpre.lvupImpre[0]);
@@ -351,7 +353,6 @@ public class LvUpManager : MonoBehaviour
         }
 
         Debug.Log("上がった能力の数 = " + lvUpList.Count.ToString());
-        //lvupImpreWindow.transform.DOMove(new Vector3(lvupImpreWindow.transform.position.x, lvupImpreWindow.transform.position.y + 50, lvupImpreWindow.transform.position.z), 1);
     }
         
 }

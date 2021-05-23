@@ -5,23 +5,23 @@ using UnityEngine.UI;
 using TMPro;
 
 /// <summary>
+/// マップのセル これを敷きつめてSRPGのマスにする
 /// 座標 移動可能だと青色になる
 /// </summary>
 
-//[RequireComponent(typeof(Button))]
 public class Main_Cell : MonoBehaviour
 {
-    [SerializeField] Main_Map map;
-    [SerializeField] BattleMapManager battleMapManager;
-    [SerializeField] GameObject highlight;
-    [SerializeField] GameObject attackAbleHighlight;
-    [SerializeField] GameObject healAbleHighlight;
-    [SerializeField] public TextMeshPro typeText;
+    [SerializeField] Main_Map map;                      //マップクラス
+    [SerializeField] BattleMapManager battleMapManager; //制御クラス
+    [SerializeField] GameObject highlight;              //移動可能表示(青色)
+    [SerializeField] GameObject attackAbleHighlight;    //攻撃可能表示(赤色)
+    [SerializeField] GameObject healAbleHighlight;      //回復可能表示(緑色)
+    [SerializeField] public TextMeshPro typeText;       //エディット時、セルの種類を文字で表示
 
     //210221 警戒範囲を追加
-    [SerializeField] GameObject warningHighlight;
+    [SerializeField] GameObject warningHighlight;       //敵攻撃可能範囲(紫色)
 
-    //移動コスト
+    //移動コスト 多い程移動しにくいセル
     [SerializeField]
     int cost;
     
@@ -32,23 +32,14 @@ public class Main_Cell : MonoBehaviour
     //座標
     int x;
     int y;
+    
+    CellType type;      //セルの名前 森、平地とか
+    string typeName;    //セルの名前    
+    int avoidRate;      //セルの回避率
+    int defense;        //セルの防御力
+    public bool isBlock;//210302 壁など、移動出来ないセルの場合
 
-    //セルの名前 森、平地とか
-    CellType type;
-
-    //セルの名前    
-    string typeName;
-
-    //セルの回避率
-    int avoidRate;
-
-    //セルの防御力
-    int defense;
-
-    //210302 壁など、移動出来ないセルの場合
-    public bool isBlock;
-
-    //この攻撃範囲を表示した敵 重複を防ぐ為HashSet
+    //この攻撃範囲を表示した敵 空でなければ誰か敵が攻撃可能なセルという事 重複を防ぐ為HashSet
     public HashSet<int> highLightEnemyidSet = new HashSet<int>();
 
     /// <summary>
@@ -66,26 +57,21 @@ public class Main_Cell : MonoBehaviour
     //200813 攻撃出来るかどうか
     public bool IsAttackable
     {
-        // 移動可能ならハイライトを表示させる
         set { attackAbleHighlight.gameObject.SetActive(value); }
-        //自分がアクティブかどうか返す
         get { return attackAbleHighlight.gameObject.activeSelf; }
     }
 
+    //回復出来るかどうか
     public bool IsHealable
     {
-        // 移動可能ならハイライトを表示させる
         set { healAbleHighlight.gameObject.SetActive(value); }
-        //自分がアクティブかどうか返す
         get { return healAbleHighlight.gameObject.activeSelf; }
     }
 
-    //210221 敵の攻撃範囲を取得
+    //210221 敵の攻撃範囲か
     public bool IsWarning
     {
-        // 移動可能ならハイライトを表示させる
         set { warningHighlight.gameObject.SetActive(value); }
-        //自分がアクティブかどうか返す
         get { return warningHighlight.gameObject.activeSelf; }
     }
 
@@ -135,7 +121,6 @@ public class Main_Cell : MonoBehaviour
     /// <param name="enemyId"></param>
     public void SetIsWarning(int enemyId)
     {
-        //問題は消す時なのでハイライトする分には何も考えずハイライトする
         IsWarning = true;
         highLightEnemyidSet.Add(enemyId);
     }
@@ -156,7 +141,7 @@ public class Main_Cell : MonoBehaviour
     }
 
     /// <summary>
-    /// 座標をセットします
+    /// 座標をセットして配置する
     /// </summary>
     /// <param name="x">The x coordinate.</param>
     /// <param name="y">The y coordinate.</param>
@@ -175,17 +160,16 @@ public class Main_Cell : MonoBehaviour
         float terrainHight;
         if (cellType == CellType.WATER)
         {
-            //とりあえず仮で2
+            //水の場合、空中に浮かせたいのでとりあえず仮で2
             terrainHight = 2;
         }
         else
         {
-            terrainHight = getTerrainHight(
+            terrainHight = GetTerrainHight(
             this.transform.position.x, this.transform.position.z);
         }
 
 
-        //2DはGrid Layout Groupを使ってたけど、座標を指定しないといけない
         this.transform.position=
             new Vector3(x, terrainHight + cellHightAdjust, y);
     }
@@ -265,7 +249,7 @@ public class Main_Cell : MonoBehaviour
         UpdateTypeText(typeName , cellType);
     }
 
-    //200802_デバッグ用の表示を更新する
+    //200802_デバッグ用のセルの種類テキスト表示を更新する
     private void UpdateTypeText(string typeName, CellType type)
     {
         typeText.text = typeName;
@@ -289,7 +273,8 @@ public class Main_Cell : MonoBehaviour
         typeText.color = textColor;
     }
 
-    float getTerrainHight(float x, float z)
+    //Terrainの高さを取得する
+    float GetTerrainHight(float x, float z)
     {
         //terrainの座標を取得するおまじない
         return terrain.terrainData.GetInterpolatedHeight((x - terrain.transform.position.x) / terrain.terrainData.size.x, (z - terrain.transform.position.z) / terrain.terrainData.size.z);

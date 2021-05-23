@@ -3,8 +3,7 @@ using UnityEditor;
 using System.Collections.Generic;
 
 /// <summary>
-/// マップ一覧を作成する
-/// UnitDatabaseとほぼ同じ
+/// マップの地形効果(平地、茂みなど)ScriptabeleObject製作用クラス
 /// </summary>
 
 public static class MapDataCreator

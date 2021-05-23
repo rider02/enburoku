@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-/// <summary>
+﻿/// <summary>
 /// 手持ちのアイテムのラッパークラス
 /// 武器、装飾品、薬、道具等を格納する
 /// 210219 耐久力管理の為、武器を保持させる
@@ -16,23 +12,16 @@ public class Item
 
     public string ItemName;
 
-    //武器
-    public Weapon weapon;
-
-    public Accessory accessory;
-
-    public Potion potion;
-
-    public Tool tool;
-
-    public bool isEquip;
-
-    //public Tool tool { get; set; }
+    public Weapon weapon;           //武器
+    public Accessory accessory;     //アクセサリ
+    public Potion potion;           //薬
+    public Tool tool;               //道具
+    public bool isEquip;            //装備中か
 
     //売却出来るか このフラグ、武器等にそのまま持たせた方が良いか
     public bool isNotForSale;
 
-    //武器タイプで初期化
+    //武器で初期化
     public Item(Weapon weapon)
     {
         ItemType = ItemType.WEAPON;

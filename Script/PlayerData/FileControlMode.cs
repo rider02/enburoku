@@ -1,7 +1,9 @@
 ﻿/// <summary>
-/// SaveAndLoadButtonに送る事でクリック時の操作が変わる
+/// SaveAndLoadButtonに送る事でボタンクリック時の操作が変わる
 /// </summary>
 public enum FileControlMode
 {
-    SAVE,LOAD,DELETE
+    SAVE,   //セーブ
+    LOAD,   //ロード
+    DELETE  //データ削除
 }

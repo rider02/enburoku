@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-/// <summary>
+﻿/// <summary>
 /// 使用出来るアイテム
 /// </summary>
 //System.Serializableを設定しないと、データを保持できない(シリアライズできない)ので注意

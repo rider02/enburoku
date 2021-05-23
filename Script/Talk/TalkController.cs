@@ -1,15 +1,9 @@
-﻿
-using System;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.UI;
-using DG.Tweening;
-
+﻿using UnityEngine;
 /// <summary>
+/// 支援会話のクラス
 /// ここから各クラスの初期化を行う
 /// </summary>
-public class GameController : MonoBehaviour
+public class TalkController : MonoBehaviour
 {
     public SceneController sceneController;
 

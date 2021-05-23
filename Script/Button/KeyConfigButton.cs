@@ -8,14 +8,10 @@ using UnityEngine.UI;
 /// </summary>
 public class KeyConfigButton : MonoBehaviour
 {
-    [SerializeField]
-    private Text KeyConfigTypeText; //決定、キャンセル等の機能
+    [SerializeField] private Text KeyConfigTypeText; //決定、キャンセル等の機能
+    [SerializeField] private Text assignKeyCodeText; //アサインされているKeyCode
 
-    [SerializeField]
-    private Text assignKeyCodeText; //アサインされているKeyCode
-
-    private KeyConfigType keyconfigType;    //どの機能のボタンかを保持
-
+    private KeyConfigType keyconfigType;    //どの機能(決定、キャンセル等)のボタンかを保持
     private KeyConfigManager keyConfigManager;
 
 
@@ -30,7 +26,7 @@ public class KeyConfigButton : MonoBehaviour
         this.keyConfigManager = keyConfigManager;
     }
 
-    //テキスト更新
+    //テキスト更新 キーコンフィグ実行時に呼ばれる
     public void UpdateText(KeyConfigType keyconfigType, KeyCode keycode)
     {
         //機能テキスト、アサインされているKeyCodeテキスト設定
@@ -38,7 +34,7 @@ public class KeyConfigButton : MonoBehaviour
         assignKeyCodeText.text = keycode.ToString();
     }
 
-    //クリック時
+    //クリック時 アサインしたいキー入力受付モードへ
     public void OnClick()
     {
         keyConfigManager.KeyAssignReceipt(keyconfigType);

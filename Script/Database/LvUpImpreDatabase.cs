@@ -3,7 +3,7 @@ using UnityEngine;
 using System.Linq;
 
 /// <summary>
-/// コメント一覧のクラス
+/// レベルアップ時のコメント一覧ScriptableObject精製用クラス
 /// </summary>
 public class LvUpImpreDatabase : ScriptableObject
 {

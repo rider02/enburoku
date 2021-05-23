@@ -19,5 +19,4 @@ public enum LoseCondition
     [StringValue("20ターン経過")]
     TURN20,
 
-    //意外と少ねえな
 }

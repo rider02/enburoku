@@ -6,7 +6,7 @@ using UnityEditor;
 
 /// <summary>
 /// 210216
-/// 回復、ステータスアップアイテムのアセットファイルを作ってくれるクラス
+/// 回復、ステータスアップアイテムのScriptabeleObject製作用クラス
 /// Unity上部の「Create」から使用する
 /// </summary>
 public static class PotionDatabaseCreator

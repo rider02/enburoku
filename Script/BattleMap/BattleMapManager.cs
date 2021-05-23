@@ -7,47 +7,51 @@ using DG.Tweening;
 using UnityEngine.EventSystems;
 using System;
 
+/// <summary>
+/// 戦闘マップ制御用クラス
+/// マップ処理はMain_Map、戦闘はBattleManager、敵ターンはEnemyAIManagerとやり取りして各種処理を行う
+/// </summary>
 public class BattleMapManager : MonoBehaviour
 {
 
-    [SerializeField] BattleMapCursor battleMapCursor;
-    [SerializeField] GameObject mainCamera;
-    [SerializeField] Main_Map mainMap;
-    [SerializeField] CellTypeView cellTypeView;
-    [SerializeField] UnitController unitController;
-    [SerializeField] Transform unitContainer;
-    [SerializeField] CoordinateWindow coordinateWindow;
-    [SerializeField] Transform enemyContainer;
-    [SerializeField] Transform treasureContainer;
-    [SerializeField] EditorModeView editorModeView;
-    [SerializeField] GameObject editMenuWindow;
-    [SerializeField] GameObject stageDetailWindow;
-    [SerializeField] GameObject selectCellTypeWindow;
-    [SerializeField] GameObject unitSelectView;
-    [SerializeField] Text inputCellText;
-    [SerializeField] UnitOutlineWindow unitOutlineWindow;
-    [SerializeField] FadeInOutManager fadeInOutManager;
-    [SerializeField] GameObject preparationMenuWindow;
-    [SerializeField] GameObject preparationWindow;
-    [SerializeField] EntryCountWindow entryCountWindow;
+    [SerializeField] BattleMapCursor battleMapCursor;       //カーソル
+    [SerializeField] GameObject mainCamera;                 //カメラ
+    [SerializeField] Main_Map mainMap;                      //マップ
+    [SerializeField] CellTypeView cellTypeView;             //セルの種類表示UI
+    [SerializeField] UnitController unitController;         //ユニット一覧
+    [SerializeField] Transform unitContainer;               //ユニットを入れるゲームオブジェクト
+    [SerializeField] CoordinateWindow coordinateWindow;     //座標表示UI(エディタ用)
+    [SerializeField] Transform enemyContainer;              //敵を入れるゲームオブジェクト
+    [SerializeField] Transform treasureContainer;           //宝箱を入れるゲームオブジェクト
+    [SerializeField] EditorModeView editorModeView;         //エディタUI
+    [SerializeField] GameObject editMenuWindow;             //エディタメニュー
+    [SerializeField] GameObject stageDetailWindow;          //戦闘前のステージ詳細UI
+    [SerializeField] GameObject selectCellTypeWindow;       //エディタのセル表示UI
+    [SerializeField] GameObject unitSelectView;             //戦闘前のユニット選択UI
+    [SerializeField] Text inputCellText;                    //エディタの入力セル表示UI
+    [SerializeField] UnitOutlineWindow unitOutlineWindow;   //ユニットにカーソルを合わせた時の表示UI
+    [SerializeField] FadeInOutManager fadeInOutManager;     //フェードイン、フェードアウト処理クラス
+    [SerializeField] GameObject preparationMenuWindow;      //戦闘準備メニューUI
+    [SerializeField] GameObject preparationWindow;          //戦闘準備メニューUI
+    [SerializeField] EntryCountWindow entryCountWindow;     //戦闘準備のユニット出撃数UI
     [SerializeField] GameObject mapView;
-    [SerializeField] UnitOutlineWindow mapUnitOutlineWindow;
-    [SerializeField] UnitOutlineWindow mapEnemyOutlineWindow;
-    [SerializeField] GameObject movedMenuWindow;
-    [SerializeField] BattleManager battleManager;
-    [SerializeField] GameObject weaponWindow;
-    [SerializeField] GameObject detailWindow;
-    [SerializeField] GameObject itemDetailWindow;
-    [SerializeField] GameObject weaponDetailWindow;
-    [SerializeField] GameObject ItemUseEquipWindow;
+    [SerializeField] UnitOutlineWindow mapUnitOutlineWindow;//ユニットにカーソルを合わせた時の表示UI
+    [SerializeField] UnitOutlineWindow mapEnemyOutlineWindow;   //敵にカーソルを合わせた時の表示UI
+    [SerializeField] GameObject movedMenuWindow;            //移動後のメニューUI
+    [SerializeField] BattleManager battleManager;           //戦闘処理クラス
+    [SerializeField] GameObject weaponWindow;               //攻撃する武器表示UI
+    [SerializeField] GameObject detailWindow;               //武器の詳細UI
+    [SerializeField] GameObject itemDetailWindow;           //道具の詳細UI
+    [SerializeField] GameObject weaponDetailWindow;         //武器の詳細UI
+    [SerializeField] GameObject ItemUseEquipWindow;         //道具を選択した時、装備、使うコマンドを表示するUI
 
-    [SerializeField] GameObject mapMenuView;
+    [SerializeField] GameObject mapMenuView;                //マップメニュー(ターン終了等)UI
     [SerializeField] BattleConditionWindow battleConditionWindow;
-    [SerializeField] EnemyAIManager enemyAIManager;
-    [SerializeField] GameObject battleConfirmWindow;
-    [SerializeField] GameObject useItemConfirmWindow;
-    [SerializeField] UseItemManager useItemManager;
-    [SerializeField] GameObject messageWindow;
+    [SerializeField] EnemyAIManager enemyAIManager;         //敵AI制御クラス
+    [SerializeField] GameObject battleConfirmWindow;        //戦闘開始確認UI
+    [SerializeField] GameObject useItemConfirmWindow;       //道具使用確認UI
+    [SerializeField] UseItemManager useItemManager;         //アイテム使用制御クラス
+    [SerializeField] GameObject messageWindow;              //メッセージ(技能レベルアップ等)表示ウィンドウ
     [SerializeField] GameObject unitSelectButton;
     [SerializeField] ItemInventory itemInventory;
     [SerializeField] EXPWindow expWindow;
@@ -74,18 +78,20 @@ public class BattleMapManager : MonoBehaviour
     [SerializeField] AudioSource battleSE;
     [SerializeField] AudioSource treasureSE;
 
+    //210523 戦闘中デバッグ用メッセージを表示するか
+    [SerializeField] bool battleTextVisible;
+
+    //各種アイテムアセットファイル
     WeaponDatabase weaponDatabase;
-
     AccessoryDatabase accessoryDatabase;
-
     PotionDatabase potionDatabase;
-
     ToolDatabase toolDatabase;
+    UnitDatabase unitDatabase;
 
     //210216 キャンセルボタンを押した時にフォーカスを戻す武器
     public GameObject selectedItem;
 
-    //210302 武器を選択するとselectedItemが書き変わって戻れなくなるので、こちらに保存する
+    //210302 フォーカスを戻すUI 武器を選択するとselectedItemが書き変わって戻れなくなるので、こちらに保存する
     public GameObject selectedMovedMenuItem;
 
     //セル
@@ -100,7 +106,7 @@ public class BattleMapManager : MonoBehaviour
     //地形の高さに合わせてカーソルを移動させる用
     Terrain terrain;
 
-    //カメラの位置を調整。正の数ならプレイヤーの前に、負の数ならプレイヤーの後ろに配置する
+    //カメラの位置を調整　正の数ならプレイヤーの前に、負の数ならプレイヤーの後ろに配置する
     float yAdjust = 4;
     float zAdjust = -4;
     int yAdjustTarget;
@@ -133,12 +139,13 @@ public class BattleMapManager : MonoBehaviour
     //200809 出撃するユニットの名前
     public List<string> entryUnitNameList { get; set; }
 
+    //選択したステージ
     public Stage stage;
 
     //出撃準備からスタート
     public MapMode mapMode = MapMode.PREPARATION;
 
-    //ステータス画面にはマップ確認、通常から遷移出来るので、戻り先を保存しておく
+    //210522 ユニットのステータス画面にはマップ確認、通常から遷移出来るので、戻り先を保存しておく
     private MapMode returnMapMode;
 
     //整数にしたカーソルの座標
@@ -165,7 +172,7 @@ public class BattleMapManager : MonoBehaviour
 
     private float ControllDeltaTime;
 
-    //210216 戦闘開始確認から戻る為に仕方なく作成
+    //210216 戦闘開始確認か
     private bool isAttackConfirm;
 
     //210218 メッセージの表示でモードが変わると戻り先確認が面倒なので、フラグで管理
@@ -187,6 +194,19 @@ public class BattleMapManager : MonoBehaviour
 
     void Start()
     {
+        //各種アセットファイル読み込み
+        weaponDatabase = Resources.Load<WeaponDatabase>("weaponDatabase");
+        potionDatabase = Resources.Load<PotionDatabase>("potionDatabase");
+        toolDatabase = Resources.Load<ToolDatabase>("toolDatabase");
+        accessoryDatabase = Resources.Load<AccessoryDatabase>("accessoryDatabase");
+        EnemyDatabase enemyDatabase = Resources.Load<EnemyDatabase>("enemyDatabase");
+        unitDatabase = Resources.Load<UnitDatabase>("unitDatabase");
+
+        //選択したステージの情報をアセットから取得する 列挙型は選択しないとステージ1
+        StageDatabase stageDatabase = Resources.Load<StageDatabase>("stageDatabase");
+        stage = stageDatabase.FindByChapter(StageSelectManager.selectedChapter);
+        //210302 ステージのテストの為
+        //stage = stageDatabase.FindByChapter(Chapter.STAGE3);
 
         entryUnitNameList = new List<string>();
         messageList = new List<string>();
@@ -196,8 +216,8 @@ public class BattleMapManager : MonoBehaviour
         {
             //unitDatabase初期化
             Debug.Log("ユニット一覧初期化");
-            UnitDatabase unitDatabase = Resources.Load<UnitDatabase>("unitDatabase");
-            unitController.initUnitList(unitDatabase);
+            
+            unitController.InitUnitList(unitDatabase);
         }
 
         //210303 宝箱の取得情報
@@ -219,24 +239,13 @@ public class BattleMapManager : MonoBehaviour
             StageSelectManager.selectedChapter = Chapter.STAGE1;
         }
 
-        weaponDatabase = Resources.Load<WeaponDatabase>("weaponDatabase");
-
-        potionDatabase = Resources.Load<PotionDatabase>("potionDatabase");
-
-        toolDatabase = Resources.Load<ToolDatabase>("toolDatabase");
-
-        accessoryDatabase = Resources.Load<AccessoryDatabase>("accessoryDatabase");
-
-        EnemyDatabase enemyDatabase = Resources.Load<EnemyDatabase>("enemyDatabase");
-
-        //選択したステージの情報を表示する 列挙型は選択しないとステージ1
-        StageDatabase stageDatabase = Resources.Load<StageDatabase>("stageDatabase");
+        //進行度初期化
+        if (!ChapterManager.isChapterInit)
+        {
+            ChapterManager.Init();
+        }
 
 
-        stage = stageDatabase.FindByChapter(StageSelectManager.selectedChapter);
-        //210302 ステージのテストの為
-        //stage = stageDatabase.FindByChapter(Chapter.STAGE3);
-        
         if (stage == null)
         {
             //通常有り得ない
@@ -245,7 +254,7 @@ public class BattleMapManager : MonoBehaviour
         }
         Debug.Log($"ステージ:{stage.chapter}読み込み");
 
-        //ステージが出撃選択出来ない場合はボタン無効化
+        //ステージが出撃選択出来ない場合は出撃選択ボタン無効化
         if (stage.isUnitSelectRequired)
         {
             unitSelectButton.SetActive(true);
@@ -263,7 +272,7 @@ public class BattleMapManager : MonoBehaviour
         mapEditManager.Init(this, mainMap, editorModeView, editMenuWindow, selectCellTypeWindow, inputCellText);
 
         //210211 戦闘処理の準備
-        battleManager.Init(this, effectManager, enemyAIManager, battleTalkManager, expWindow);
+        battleManager.Init(this, effectManager, enemyAIManager, battleTalkManager, expWindow, battleTextVisible);
 
         //210212 敵AIを初期化
         enemyAIManager.Init(this, battleManager, battleTalkManager, mainMap, unitContainer, enemyContainer, battleMapCursor);
@@ -277,6 +286,9 @@ public class BattleMapManager : MonoBehaviour
 
         //210210 ターン開始エフェクトの初期化
         turnEffectManager.Init(this);
+
+        //210523 出撃前のユニット追加処理
+        unitController.AddUnitBeforeBattle(stage.chapter, unitDatabase);
 
         //出撃ユニット一覧を作成する
         unitController.InitPreparePartyList(this, unitSelectView);
@@ -300,9 +312,8 @@ public class BattleMapManager : MonoBehaviour
         terrain.transform.position = stageTerrain.transform.position;
         Debug.Log($"Terrainの位置{terrain.transform.position}");
 
-        //マップ精製 200724 まだランダム→200809 セーブ、ロード可能に
-        //TODO 210302ステージによってセルの数を変えること
-        mainMap.Generate(20, 20);
+        //マップ精製 初回のマップ作成時は使用する
+        //mainMap.Generate(20, 20);
 
         //マップ読み込み
         mainMap.LoadMap(stage);
@@ -359,8 +370,7 @@ public class BattleMapManager : MonoBehaviour
                 index++;
             }
         }
-        //200813 敵リストを作成 ここは適当なので後で変える事
-        //やっとステージから取得するようにした
+        //200813 敵リストから敵を配置 敵情報はステージが保持している
         List<Enemy> enemyList = stage.enemyList;
 
         int id = 0;
@@ -393,7 +403,7 @@ public class BattleMapManager : MonoBehaviour
             treasure.Init(this);
             Transform treasureModel = (Instantiate(Resources.Load("Prefabs/TreasureModel")) as GameObject).transform;
 
-            //初期化の方法これで合ってる？
+            //初期化
             treasureModel.GetComponent<TreasureModel>().Init(treasure,this , mainMap);
             treasureModel.name = treasureModel.name.Replace("(Clone)", "");
             Coordinate coordinate = treasure.coordinate;
@@ -404,7 +414,7 @@ public class BattleMapManager : MonoBehaviour
             id++;
         }
 
-        //210227 主人公にカーソル移動 レミリアルート
+        //210227 主人公にカーソル移動
         Coordinate FirstCoordinate = stage.entryUnitCoordinates[0];
         Main_Cell firstCell = mainMap.Cells.FirstOrDefault(c => c.X == FirstCoordinate.x && c.Y == FirstCoordinate.y);
 
@@ -420,7 +430,7 @@ public class BattleMapManager : MonoBehaviour
         //200816 現在のターン数
         turn = 1;
 
-        //210205 BGMPlayerをタイトルから引き継いでなければ作成？
+        //210205 BGMPlayerをタイトルから引き継いでなければ作成
         GameObject bgmManager = GameObject.Find("BGMManager");
         if (bgmManager == null)
         {
@@ -436,9 +446,9 @@ public class BattleMapManager : MonoBehaviour
 
         //210209 フェードイン
         fadeInOutManager.FadeinStart();
-    }
 
-    // Update is called once per frame
+    }//Startここまで
+
     void Update()
     {
         //プレー時間更新
@@ -500,14 +510,23 @@ public class BattleMapManager : MonoBehaviour
         }
         else if (mapMode == MapMode.NORMAL)
         {
+            if (isMessaseExist)
+            {
+                SetMapMode(MapMode.MESSAGE);
+            }
+
+            //オートターンエンド処理
+            //オプションで変更出来るようにする
+            AutoTurnEnd();
             //自軍ターンで敵が居ないか判定して0ならクリアとみなす
             if (enemyContainer.childCount == 0)
             {
-                StageCrear();
+                StageClear();
             }
         }
         else if (mapMode == MapMode.GAME_OVER)
         {
+            //ゲームオーバー
             ReturnTitle();
         }
 
@@ -516,17 +535,11 @@ public class BattleMapManager : MonoBehaviour
         //決定ボタンに関する処理
         SubmitButton();
 
-        //210221 主に△ボタンはメニューボタンにする
-        if (KeyConfigManager.GetKeyDown(KeyConfigType.MENU))
-        {
-            MenuButton();
-        }
+        //メニューボタン
+        MenuButton();
 
         //200725 キャンセルボタン
-        if (KeyConfigManager.GetKeyDown(KeyConfigType.CANCEL))
-        {
-            CancelButton();
-        }
+        CancelButton();
 
 
         //出撃準備の時は行わない処理
@@ -550,8 +563,6 @@ public class BattleMapManager : MonoBehaviour
             //カメラの距離を変えるボタン
             AdjustCamela();
 
-            
-
             //移動中はメニューを表示しない
             if (mapMode == MapMode.MOVEDMENU)
             {
@@ -569,7 +580,7 @@ public class BattleMapManager : MonoBehaviour
             UpdateEnemyOutlineWindow();
         }
 
-        //210303 どうしてもフォーカスが外れる
+        //210303 フォーカスが外れた場合
         if(mapMode == MapMode.ITEM_SELECT)
         {
             if (EventSystem.current.currentSelectedGameObject == null)
@@ -578,7 +589,6 @@ public class BattleMapManager : MonoBehaviour
                 EventSystem.current.SetSelectedGameObject(weaponWindow.transform.Find("MapItemButton" + controlItemButtonIndex).gameObject);
             }
         }
-        
 
         //エディット機能
         if (Input.GetKeyDown(KeyCode.E))
@@ -588,7 +598,7 @@ public class BattleMapManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 210301 メソッドに分割 Updateから呼ばれ、現在のセルの敵味方ユニット、セル情報を表示する
+    /// 210301 Updateから呼ばれ、現在のセルの敵味方ユニット、セル情報を表示する
     /// </summary>
     private void GetCellProperty()
     {
@@ -596,7 +606,7 @@ public class BattleMapManager : MonoBehaviour
         cell = mainMap.Cells.FirstOrDefault(c => c.X == cursorPos.x && c.Y == cursorPos.z);
 
         //宝箱が有れば宝箱とUIに表示
-        if (mainMap.isTreasureExist(cell))
+        if (mainMap.IsTreasureExist(cell))
         {
             cellTypeView.TreasureUpdateText();
         }
@@ -662,7 +672,7 @@ public class BattleMapManager : MonoBehaviour
                 mapEnemyOutlineWindow.gameObject.SetActive(false);
                 return;
             }
-            //200725 バグってたけど、座標にユニットが居ない事も当然有るので
+            //200725 座標にユニットが居ない事も当然有るので
             //Nullを許容するFirstOrDefaultを使用
             EnemyModel selectedEnemy = enemyContainer.GetComponentsInChildren<EnemyModel>().FirstOrDefault(
                 c => c.x == cursorPos.x && c.y == cursorPos.z);
@@ -709,14 +719,22 @@ public class BattleMapManager : MonoBehaviour
         //準備メニュー非表示
         preparationWindow.SetActive(false);
 
-        //210519 戦闘前会話をセット
-        battleTalkManager.SetBattleStartTalk(StageSelectManager.selectedChapter);
+        //210519 戦闘前会話をセット 基本的に存在する
+        if (battleTalkManager.IsBattleStartTalkExist(StageSelectManager.selectedChapter))
+        {
+            //画面暗転して戦闘前会話へ
+            fadeInOutManager.FadeoutAndFadeinStart(MapMode.START_TALK);
+        }
+        else
+        {
+            //戦闘前会話が存在しない場合
+            fadeInOutManager.FadeoutAndFadeinStart(MapMode.TURN_START);
+        }
 
-        //画面暗転して戦闘前会話へ
-        fadeInOutManager.FadeoutAndFadeinStart(MapMode.START_TALK);
+        
     }
 
-    //210211 敵軍ターン開始エフェクトが終わった時にTurnEffectManagerから呼ばれる
+    //210211敵軍ターン開始 敵軍ターン開始エフェクトが終わった時に呼ばれる
     public void ChangeMapmodeEnemyTurn()
     {
 
@@ -727,12 +745,12 @@ public class BattleMapManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 自軍のターン開始等で呼ぶ想定
+    /// 自軍のターン開始処理 指定ターン開始時の会話確認も行う
     /// </summary>
     public void PrepareMapmodeNormal()
     {
         //210520 ターン開始前会話が存在すればターン開始前会話へ
-        if (battleTalkManager.isTurnTalkExist(StageSelectManager.selectedChapter, turn))
+        if (battleTalkManager.IsTurnTalkExist(StageSelectManager.selectedChapter, turn))
         {
             SetMapMode(MapMode.TURN_START_TALK);
         }
@@ -744,7 +762,7 @@ public class BattleMapManager : MonoBehaviour
         mapView.gameObject.SetActive(true);
     }
 
-    //mapModeをセットする
+    //mapModeをセットとログ出力
     public void SetMapMode(MapMode mapMode)
     {
         this.mapMode = mapMode;
@@ -752,14 +770,13 @@ public class BattleMapManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 210210 自軍ターン開始前の演出
+    /// 210210 自軍ターン開始前の演出準備してから、戦闘前会話かターン開始演出へ遷移する
     /// </summary>
     public void ChangeMapmodeTurnStart(MapMode mapMode)
     {
-        //エフェクトを表示未完了にしてターン開始へ
+        //エフェクトを表示完了にしてターン開始へ
         turnEffectManager.EffectInit();
-        this.mapMode = mapMode;
-        Debug.Log("mapMode = " + mapMode);
+        SetMapMode(mapMode);
     }
 
     /// <summary>
@@ -773,7 +790,7 @@ public class BattleMapManager : MonoBehaviour
         PlayerModel playerModel = mainMap.ActiveUnit;
         Unit unit = mainMap.ActiveUnit.unit;
 
-        //210301 やっと宝箱判定を追加
+        //210301 宝箱判定を追加
         Main_Cell cell = mainMap.Cells.FirstOrDefault(c => c.X == playerModel.x && c.Y == playerModel.z);
         if(cell == null)
         {
@@ -894,8 +911,11 @@ public class BattleMapManager : MonoBehaviour
     /// <param name="coordinate"></param>
     public void OpenTreasureBox()
     {
+        movedMenuWindow.SetActive(false);
+        deltaTime = 0;
+
         Unit unit = mainMap.ActiveUnit.unit;
-        //保存していなければ、無い状況で「宝箱」ボタンが表示されてるってこと
+        //保存していなければ、無い状況で「宝箱」ボタンが表示されてるってこと　通常有り得ない
         if (treasureCoordinate == null)
         {
             Debug.Log("Error : 宝箱の座標を保持していません");
@@ -940,7 +960,7 @@ public class BattleMapManager : MonoBehaviour
         //持ち物が一杯なら
         if (unit.carryItem.Count >= 6)
         {
-            itemInventory.addItem(treasure);
+            itemInventory.AddItem(treasure);
             messageList.Add($"{treasure.ItemName}は\n手持ちが一杯なのでスキマに送りました。");
             Debug.Log($"{treasure.ItemName} は手持ちが一杯なのでスキマに入れた。");
         }
@@ -950,13 +970,16 @@ public class BattleMapManager : MonoBehaviour
             
         }
 
-        //メッセージ表示 良い処理思い付かない
+        //メッセージ表示
         OpenMessageWindow(messageList[0]);
-        messageList.RemoveAt(0);
+        messageList.RemoveAt(0);//表示と同時に1件確認したので削除
 
         //待機処理 
-        Wait();
+        mainMap.ActiveUnit.isMoved = true;
+        mainMap.ActiveUnit.SetBeforeAction(false);
+        
 
+        SetMapMode(MapMode.MESSAGE);
     }
 
     /// <summary>
@@ -964,7 +987,7 @@ public class BattleMapManager : MonoBehaviour
     /// </summary>
     public void Wait()
     {
-        //210521 敗北時はDestroyしているので行動済み処理は行わない
+        //210521 敗北時は既にユニットはDestroyしているので行動済み処理行わない
         if(mainMap.ActiveUnit != null)
         {
             mainMap.ActiveUnit.isMoved = true;
@@ -976,8 +999,6 @@ public class BattleMapManager : MonoBehaviour
         mapMode = MapMode.NORMAL;
         Debug.Log("MapMode : " + mapMode);
 
-        //TODO 自動ターンエンドは設定で変えられるようにする
-        AutoTurnEnd();
     }
 
     //210519 「マップ確認」ボタンを押した時 マップの確認
@@ -1482,8 +1503,13 @@ public class BattleMapManager : MonoBehaviour
         }
         else
         {
+            //最後のメッセージの場合
             isMessaseExist = false;
+            
             messageWindow.SetActive(false);
+
+            //210523 基本、宝箱のメッセージのみだが、そうでない場合は戻り先の制御が必要となる
+            SetMapMode(MapMode.NORMAL);
 
             //元のフォーカスへ
             EventSystem.current.SetSelectedGameObject(selectedItem);
@@ -1633,18 +1659,25 @@ public class BattleMapManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 210225 超適当だが、ステージクリア判定メソッド
+    /// 210225 ステージクリア判定メソッド
     /// </summary>
-    public void StageCrear()
+    public void StageClear()
     {
-        mapMode = MapMode.STAGE_CLEAR;
-        Debug.Log("MapMode : " + mapMode);
+        //ユニット追加処理
+        unitController.AddUnitAfterBattle(stage.chapter, unitDatabase);
 
         //210304 進行度を更新 インクリメントすると次の章へ
-        ChapterManager.chapter = stage.chapter +=1;
+        //210522 体験版はステージ2まで 
+        if ((int)stage.chapter < 2){
+            ChapterManager.chapter = stage.chapter += 1;
+        }
+        
         Debug.Log("ステージクリア！次のステージ : " + ChapterManager.chapter.GetStringValue());
         //仮にメッセージを表示
         OpenMessageWindow("ステージクリアしました。");
+
+        mapMode = MapMode.STAGE_CLEAR;
+        Debug.Log("MapMode : " + mapMode);
     }
 
     public void GameOver()
@@ -1759,11 +1792,11 @@ public class BattleMapManager : MonoBehaviour
     /// </summary>
     private void ChangeCursorSpeed()
     {
-        if (Input.GetKey(KeyCode.D) || KeyConfigManager.GetKey(KeyConfigType.SPEED))
+        if (Input.GetButton("Speed") || KeyConfigManager.GetKey(KeyConfigType.SPEED))
         {
             cursorMoveSpeed = 0.1f;
         }
-        if (Input.GetKeyUp(KeyCode.D) || KeyConfigManager.GetKeyUp(KeyConfigType.SPEED))
+        if (Input.GetButtonUp("Speed") || KeyConfigManager.GetKeyUp(KeyConfigType.SPEED))
         {
             cursorMoveSpeed = 0.05f;
         }
@@ -1810,7 +1843,7 @@ public class BattleMapManager : MonoBehaviour
     private void SubmitButton()
     {
         //〇ボタン
-        if (KeyConfigManager.GetKeyDown(KeyConfigType.SUBMIT))
+        if (KeyConfigManager.GetKeyDown(KeyConfigType.SUBMIT) || Input.GetButtonDown("Submit"))
         {
             //210302 エディットモード中は専用メソッドに処理を委ねる
             if (mapEditManager.isEditorMode)
@@ -2087,7 +2120,7 @@ public class BattleMapManager : MonoBehaviour
         if (mapEditManager.isEditorMode)
         {
             //編集モードのみ押しっぱなし対応でセル連続入力
-            if (KeyConfigManager.GetKeyDown(KeyConfigType.SUBMIT))
+            if (KeyConfigManager.GetKey(KeyConfigType.SUBMIT) || Input.GetButton("Submit"))
             {
                 mapEditManager.EditFireButton();
             }
@@ -2100,70 +2133,75 @@ public class BattleMapManager : MonoBehaviour
     /// </summary>
     public void MenuButton()
     {
-        //ボタン連打防止
-        if (deltaTime <= BUTTON_WAIT)
+        //210221 主に△ボタンはメニューボタンにする
+        if (KeyConfigManager.GetKeyDown(KeyConfigType.MENU) || Input.GetButton("Menu"))
         {
-            return;
-        }
-
-        //メッセージ表示中は何も起こらない
-        if (isMessaseExist)
-        {
-            return;
-        }
-
-        deltaTime = 0;
-
-        Debug.Log("メニューボタンを押した");
-
-        //通常時、マップ確認時のみ表示 敵のターン、UIが出ている時等に表示されたらダメ
-        if (mapMode == MapMode.NORMAL || mapMode == MapMode.MAP_VIEW)
-        {
-            //有り得ないが、もしユニットが存在しなければ何もしない
-            if (unitContainer.GetComponentInChildren<PlayerModel>() == null)
+            //ボタン連打防止
+            if (deltaTime <= BUTTON_WAIT)
             {
-                Debug.Log("ERROR:ユニットがunitContainerに存在しません");
                 return;
             }
 
-            //カーソル位置のユニット取得
-            PlayerModel selectedPlayer = unitContainer.GetComponentsInChildren<PlayerModel>().FirstOrDefault(
-            c => c.x == cursorPos.x && c.z == cursorPos.z);
-
-            EnemyModel selectedEnemy = enemyContainer.GetComponentsInChildren<EnemyModel>().FirstOrDefault(
-            c => c.x == cursorPos.x && c.y == cursorPos.z);
-
-            //プレイヤーが存在すればプレイヤーのステータス表示
-            if (selectedPlayer != null)
+            //メッセージ表示中は何も起こらない
+            if (isMessaseExist)
             {
-                OpenUnitStatusWindow(selectedPlayer);
-                
-            }
-            else if (selectedEnemy != null)
-            {
-                OpenEnemyStatusWindow(selectedEnemy);
-            }
-            else
-            {
-                //敵、味方共に居ない場合は何も起こらない
-                Debug.Log("WARN:ユニットの居ないセルです");
                 return;
             }
 
-            //効果音再生
-            decideSE.Play();
+            deltaTime = 0;
 
-            //通常、マップ確認等からステータス画面に遷移出来るので、戻り先を保存しておく
-            returnMapMode = mapMode;
+            Debug.Log("メニューボタンを押した");
 
-            mapMode = MapMode.STATUS;
-            Debug.Log($"mapMode:{mapMode}");
+            //通常時、マップ確認時のみ表示 敵のターン、UIが出ている時等に表示されたらダメ
+            if (mapMode == MapMode.NORMAL || mapMode == MapMode.MAP_VIEW)
+            {
+                //有り得ないが、もしユニットが存在しなければ何もしない
+                if (unitContainer.GetComponentInChildren<PlayerModel>() == null)
+                {
+                    Debug.Log("ERROR:ユニットがunitContainerに存在しません");
+                    return;
+                }
 
-            //ここでやっとステータス表示
-            statusWindow.SetActive(true);
+                //カーソル位置のユニット取得
+                PlayerModel selectedPlayer = unitContainer.GetComponentsInChildren<PlayerModel>().FirstOrDefault(
+                c => c.x == cursorPos.x && c.z == cursorPos.z);
 
-            return;
+                EnemyModel selectedEnemy = enemyContainer.GetComponentsInChildren<EnemyModel>().FirstOrDefault(
+                c => c.x == cursorPos.x && c.y == cursorPos.z);
+
+                //プレイヤーが存在すればプレイヤーのステータス表示
+                if (selectedPlayer != null)
+                {
+                    OpenUnitStatusWindow(selectedPlayer);
+
+                }
+                else if (selectedEnemy != null)
+                {
+                    OpenEnemyStatusWindow(selectedEnemy);
+                }
+                else
+                {
+                    //敵、味方共に居ない場合は何も起こらない
+                    Debug.Log("WARN:ユニットの居ないセルです");
+                    return;
+                }
+
+                //効果音再生
+                decideSE.Play();
+
+                //通常、マップ確認等からステータス画面に遷移出来るので、戻り先を保存しておく
+                returnMapMode = mapMode;
+
+                mapMode = MapMode.STATUS;
+                Debug.Log($"mapMode:{mapMode}");
+
+                //ここでやっとステータス表示
+                statusWindow.SetActive(true);
+
+                return;
+            }
         }
+        
     }
 
     private void OpenUnitStatusWindow(PlayerModel selectedPlayer)
@@ -2236,218 +2274,220 @@ public class BattleMapManager : MonoBehaviour
     /// </summary>
     public void CancelButton()
     {
-        
-
-        if (deltaTime <= BUTTON_WAIT)
+        //200725 キャンセルボタン
+        if (KeyConfigManager.GetKeyDown(KeyConfigType.CANCEL) || Input.GetButton("Cancel"))
         {
-            return;
-        }
-
-        //ボタン連打防止
-        deltaTime = 0;
-
-        //エディットモード時は専用メソッドに処理を委ねる
-        if (mapEditManager.isEditorMode)
-        {
-            mapEditManager.EditCancelButton();
-            return;
-        }
-
-        //210217 メッセージウィンドウは優先度高く設定
-        if (isMessaseExist)
-        {
-            CloseMessageWindow();
-            return;
-        }
-
-        //200816 キャンセルボタンでマップメニュー開
-        if(mapMode == MapMode.NORMAL)
-        {
-            Debug.Log("mapmenu");
-            mapMode = MapMode.MAP_MENU;
-            mapMenuView.SetActive(true);
-            battleConditionWindow.UpdateUnitCount(unitContainer.childCount, enemyContainer.childCount);
-            EventSystem.current.SetSelectedGameObject(null);
-            EventSystem.current.SetSelectedGameObject(mapMenuView.transform.Find("MapMenuWindow/TurnEndButton").gameObject);
-        }
-
-        else if (mapMode == MapMode.MAP_VIEW)
-        {
-            //マップ確認中の時
-            mapMode = MapMode.PREPARATION;
-            Debug.Log($"mapMode:{mapMode}");
-
-            //セルの情報などが表示されるUIを非表示、戦闘準備ウィンドウ表示
-            mapView.SetActive(false);
-            preparationWindow.SetActive(true);
-
-            //「マップ確認」ボタンにフォーカス
-            EventSystem.current.SetSelectedGameObject(null);
-            EventSystem.current.SetSelectedGameObject(preparationMenuWindow.transform.Find("SearchButton").gameObject);
-        }
-
-        //200816 既にマップメニュー表示中の時は閉じる
-        else if (mapMode == MapMode.MAP_MENU)
-        {
-
-            mapMode = MapMode.NORMAL;
-            mapMenuView.SetActive(false);
-        }
-
-        //出撃準備時に押されたらステージ選択に戻る
-        else if (mapMode == MapMode.PREPARATION)
-        {
-            Retire();
-        }
-
-        else if (mapMode == MapMode.UNIT_SELECT)
-        {
-            //ユニット選択時
-            preparationMenuWindow.SetActive(true);
-            stageDetailWindow.SetActive(true);
-            unitSelectView.SetActive(false);
-            unitOutlineWindow.gameObject.SetActive(false);
-            mapMode = MapMode.PREPARATION;
-            Debug.Log($"mapMode:{mapMode}");
-            EventSystem.current.SetSelectedGameObject(preparationMenuWindow.transform.Find("BattleStartButton").gameObject);
-
-        }
-        else if (mapMode == MapMode.WEAPON_SELECT || mapMode == MapMode.HEAL_SELECT || mapMode == MapMode.ITEM_SELECT)
-        {
-            //武器ボタンを削除する
-            battleManager.DeleteButtleWeaponButton();
-
-            //アイテムボタンをすべて削除する
-            DeleteWeaponWindowItem();
-
-            mapMode = MapMode.MOVEDMENU;
-            battleManager.CloseWeaponWindow();
-            itemDetailWindow.SetActive(false);
-            movedMenuWindow.SetActive(true);
-            EventSystem.current.SetSelectedGameObject(selectedMovedMenuItem);
-        }
-        else if (mapMode == MapMode.ATTACK_SELECT || mapMode == MapMode.HEAL_TARGET_SELECT)
-        {
-            //攻撃対象選択時
-
-            //セルのハイライトを消す
-            mainMap.ResetAttackableCells();
-            //モードを武器選択へ
-            if(mapMode == MapMode.ATTACK_SELECT)
+            if (deltaTime <= BUTTON_WAIT)
             {
-                mapMode = MapMode.WEAPON_SELECT;
-            }
-            else
-            {
-                //回復の杖の場合
-                mapMode = MapMode.HEAL_SELECT;
+                return;
             }
 
-            weaponWindow.SetActive(true);
-            detailWindow.SetActive(true);
+            //ボタン連打防止
+            deltaTime = 0;
 
-            //一度nullにしないでWindowを表示非表示すると選択済みでなくなるっぽい
-            //選択したボタンへフォーカスを戻す
-            EventSystem.current.SetSelectedGameObject(null);
-            EventSystem.current.SetSelectedGameObject(selectedItem);
-        }
-        else if(mapMode == MapMode.BATTLE_CONFIRM)
-        {
-            //戦闘開始の確認画面の時
-            //ウィンドウを閉じてモードをATTACK_SELECTへ
-            battleManager.MapCloseBattleView();
-
-            //再度攻撃可能範囲を表示
-            if (isAttackConfirm)
+            //エディットモード時は専用メソッドに処理を委ねる
+            if (mapEditManager.isEditorMode)
             {
-                        
-                if (mainMap.ActiveUnit.unit.equipWeapon != null)
+                mapEditManager.EditCancelButton();
+                return;
+            }
+
+            //210217 メッセージウィンドウは優先度高く設定
+            if (isMessaseExist)
+            {
+                CloseMessageWindow();
+                return;
+            }
+
+            //200816 キャンセルボタンでマップメニュー開
+            if (mapMode == MapMode.NORMAL)
+            {
+                Debug.Log("mapmenu");
+                mapMode = MapMode.MAP_MENU;
+                mapMenuView.SetActive(true);
+                battleConditionWindow.UpdateUnitCount(unitContainer.childCount, enemyContainer.childCount);
+                EventSystem.current.SetSelectedGameObject(null);
+                EventSystem.current.SetSelectedGameObject(mapMenuView.transform.Find("MapMenuWindow/TurnEndButton").gameObject);
+            }
+
+            else if (mapMode == MapMode.MAP_VIEW)
+            {
+                //マップ確認中の時
+                mapMode = MapMode.PREPARATION;
+                Debug.Log($"mapMode:{mapMode}");
+
+                //セルの情報などが表示されるUIを非表示、戦闘準備ウィンドウ表示
+                mapView.SetActive(false);
+                preparationWindow.SetActive(true);
+
+                //「マップ確認」ボタンにフォーカス
+                EventSystem.current.SetSelectedGameObject(null);
+                EventSystem.current.SetSelectedGameObject(preparationMenuWindow.transform.Find("SearchButton").gameObject);
+            }
+
+            //200816 既にマップメニュー表示中の時は閉じる
+            else if (mapMode == MapMode.MAP_MENU)
+            {
+
+                mapMode = MapMode.NORMAL;
+                mapMenuView.SetActive(false);
+            }
+
+            //出撃準備時に押されたらステージ選択に戻る
+            else if (mapMode == MapMode.PREPARATION)
+            {
+                Retire();
+            }
+
+            else if (mapMode == MapMode.UNIT_SELECT)
+            {
+                //ユニット選択時
+                preparationMenuWindow.SetActive(true);
+                stageDetailWindow.SetActive(true);
+                unitSelectView.SetActive(false);
+                unitOutlineWindow.gameObject.SetActive(false);
+                mapMode = MapMode.PREPARATION;
+                Debug.Log($"mapMode:{mapMode}");
+                EventSystem.current.SetSelectedGameObject(preparationMenuWindow.transform.Find("BattleStartButton").gameObject);
+
+            }
+            else if (mapMode == MapMode.WEAPON_SELECT || mapMode == MapMode.HEAL_SELECT || mapMode == MapMode.ITEM_SELECT)
+            {
+                //武器ボタンを削除する
+                battleManager.DeleteButtleWeaponButton();
+
+                //アイテムボタンをすべて削除する
+                DeleteWeaponWindowItem();
+
+                mapMode = MapMode.MOVEDMENU;
+                battleManager.CloseWeaponWindow();
+                itemDetailWindow.SetActive(false);
+                movedMenuWindow.SetActive(true);
+                EventSystem.current.SetSelectedGameObject(selectedMovedMenuItem);
+            }
+            else if (mapMode == MapMode.ATTACK_SELECT || mapMode == MapMode.HEAL_TARGET_SELECT)
+            {
+                //攻撃対象選択時
+
+                //セルのハイライトを消す
+                mainMap.ResetAttackableCells();
+                //モードを武器選択へ
+                if (mapMode == MapMode.ATTACK_SELECT)
                 {
-                    Attack(mainMap.ActiveUnit.unit.equipWeapon);
+                    mapMode = MapMode.WEAPON_SELECT;
+                }
+                else
+                {
+                    //回復の杖の場合
+                    mapMode = MapMode.HEAL_SELECT;
+                }
+
+                weaponWindow.SetActive(true);
+                detailWindow.SetActive(true);
+
+                //一度nullにしないでWindowを表示非表示すると選択済みでなくなるっぽい
+                //選択したボタンへフォーカスを戻す
+                EventSystem.current.SetSelectedGameObject(null);
+                EventSystem.current.SetSelectedGameObject(selectedItem);
+            }
+            else if (mapMode == MapMode.BATTLE_CONFIRM)
+            {
+                //戦闘開始の確認画面の時
+                //ウィンドウを閉じてモードをATTACK_SELECTへ
+                battleManager.MapCloseBattleView();
+
+                //再度攻撃可能範囲を表示
+                if (isAttackConfirm)
+                {
+
+                    if (mainMap.ActiveUnit.unit.equipWeapon != null)
+                    {
+                        Attack(mainMap.ActiveUnit.unit.equipWeapon);
+                    }
+                }
+                else
+                {
+                    //杖の場合
+                    if (mainMap.ActiveUnit.unit.equipHealRod == null)
+                    {
+                        Debug.Log("ERROR : 回復の杖を持っていません");
+                    }
+                    Attack(mainMap.ActiveUnit.unit.equipHealRod);
                 }
             }
-            else
+            else if (mapMode == MapMode.ITEM_USE_CONFIRM)
             {
-                //杖の場合
-                if (mainMap.ActiveUnit.unit.equipHealRod == null)
+                //210217 道具の使用確認の時
+                //モードを道具選択に
+                mapMode = MapMode.ITEM_SELECT;
+
+                //非表示に
+                useItemConfirmWindow.SetActive(false);
+
+                //道具選択ウィンドウ表示
+                weaponWindow.SetActive(true);
+                itemDetailWindow.SetActive(true);
+
+                //選択していたオブジェクトにフォーカス
+                EventSystem.current.SetSelectedGameObject(selectedItem);
+            }
+
+            //移動範囲表示中の場合
+            else if (mapMode == MapMode.MOVE)
+            {
+
+                //とりあえず、移動可能なマスを消す
+                mainMap.ResetMovableCells();
+                mainMap.ResetAttackableCells();
+                mapMode = MapMode.NORMAL;
+            }
+
+            //移動後のメニュー表示中の場合
+            else if (mapMode == MapMode.MOVEDMENU)
+            {
+
+                //アニメーション無しで瞬間移動させてNORMALへ
+                mainMap.ActiveUnit.ReturnTo(beforeCell);
+
+                //210221 敵の攻撃可能範囲を再計算
+                mainMap.CancelReloadHighLightCells();
+
+                movedMenuWindow.SetActive(false);
+                mapMode = MapMode.NORMAL;
+                EventSystem.current.SetSelectedGameObject(null);
+            }
+            else if (mapMode == MapMode.STATUS)
+            {
+                //ステータス画面表示中
+                //無限に増えないように作ったボタンを削除
+                statusWindow.GetComponent<StatusWindow>().DeleteSkillButtonAndItemButton();
+
+                //モードを自軍ターンへ移動して何も選択しない
+                statusWindow.SetActive(false);
+                mapMode = returnMapMode;
+                EventSystem.current.SetSelectedGameObject(null);
+            }
+
+            else if (mapMode == MapMode.ITEM_EQUIP_USE_MENU)
+            {
+                //アイテムの装備、使うメニューを表示している時
+                //モードをアイテム選択へ
+                mapMode = MapMode.ITEM_SELECT;
+                Debug.Log($"mapMode:{mapMode}");
+
+                //アイテムを「預ける」、「装備」ウィンドウを表示している時
+                //ウィンドウを閉じる
+                ItemUseEquipWindow.SetActive(false);
+
+                //ボタンを活性化
+                foreach (Transform weaponButton in weaponWindow.transform)
                 {
-                    Debug.Log("ERROR : 回復の杖を持っていません");
+                    weaponButton.GetComponent<Button>().interactable = true;
                 }
-                Attack(mainMap.ActiveUnit.unit.equipHealRod);
+
+                //フォーカスを元のアイテムボタンへ戻す
+                EventSystem.current.SetSelectedGameObject(selectedItem);
             }
-        }
-        else if (mapMode == MapMode.ITEM_USE_CONFIRM)
-        {
-            //210217 道具の使用確認の時
-            //モードを道具選択に
-            mapMode = MapMode.ITEM_SELECT;
-
-            //非表示に
-            useItemConfirmWindow.SetActive(false);
-
-            //道具選択ウィンドウ表示
-            weaponWindow.SetActive(true);
-            itemDetailWindow.SetActive(true);
-
-            //選択していたオブジェクトにフォーカス
-            EventSystem.current.SetSelectedGameObject(selectedItem);
-        }
-
-        //移動範囲表示中の場合
-        else if (mapMode == MapMode.MOVE)
-        {
-
-            //とりあえず、移動可能なマスを消す
-            mainMap.ResetMovableCells();
-            mainMap.ResetAttackableCells();
-            mapMode = MapMode.NORMAL;
-        }
-
-        //移動後のメニュー表示中の場合
-        else if (mapMode == MapMode.MOVEDMENU)
-        {
-
-            //アニメーション無しで瞬間移動させてNORMALへ
-            mainMap.ActiveUnit.ReturnTo(beforeCell);
-
-            //210221 敵の攻撃可能範囲を再計算
-            mainMap.CancelReloadHighLightCells();
-
-            movedMenuWindow.SetActive(false);
-            mapMode = MapMode.NORMAL;
-            EventSystem.current.SetSelectedGameObject(null);
-        }
-        else if (mapMode == MapMode.STATUS)
-        {
-            //ステータス画面表示中
-            //無限に増えないように作ったボタンを削除
-            statusWindow.GetComponent<StatusWindow>().DeleteSkillButtonAndItemButton();
-
-            //モードを自軍ターンへ移動して何も選択しない
-            statusWindow.SetActive(false);
-            mapMode = returnMapMode;
-            EventSystem.current.SetSelectedGameObject(null);
-        }
-
-        else if(mapMode == MapMode.ITEM_EQUIP_USE_MENU)
-        {
-            //アイテムの装備、使うメニューを表示している時
-            //モードをアイテム選択へ
-            mapMode = MapMode.ITEM_SELECT;
-            Debug.Log($"mapMode:{mapMode}");
-
-            //アイテムを「預ける」、「装備」ウィンドウを表示している時
-            //ウィンドウを閉じる
-            ItemUseEquipWindow.SetActive(false);
-
-            //ボタンを活性化
-            foreach (Transform weaponButton in weaponWindow.transform)
-            {
-                weaponButton.GetComponent<Button>().interactable = true;
-            }
-
-            //フォーカスを元のアイテムボタンへ戻す
-            EventSystem.current.SetSelectedGameObject(selectedItem);
         }
     }
 
@@ -2497,7 +2537,7 @@ public class BattleMapManager : MonoBehaviour
         ControllDeltaTime = 0;
 
         //カーソル移動
-        if (Input.GetKey(KeyCode.UpArrow) || Input.GetAxis("Vertical") > 0)
+        if (Input.GetAxis("Vertical") > 0)
         {
             //上
             //カーソルのセルへのスナップをキャンセル
@@ -2523,7 +2563,7 @@ public class BattleMapManager : MonoBehaviour
             //カーソルのスナップ調整
             isYMovePositive = true;
         }
-        if (Input.GetKey(KeyCode.DownArrow) || Input.GetAxis("Vertical") < 0)
+        if (Input.GetAxis("Vertical") < 0)
         {
             //下
             battleMapCursor.transform.DOKill();
@@ -2544,7 +2584,7 @@ public class BattleMapManager : MonoBehaviour
             isYMovePositive = false;
         }
 
-        if (Input.GetKey(KeyCode.RightArrow) || Input.GetAxis("Horizontal") > 0)
+        if (Input.GetAxis("Horizontal") > 0)
         {
             //右
             battleMapCursor.transform.DOKill();
@@ -2566,7 +2606,7 @@ public class BattleMapManager : MonoBehaviour
             isXMovePositive = true;
         }
         
-        if (Input.GetKey(KeyCode.LeftArrow) || Input.GetAxis("Horizontal") < 0)
+        if (Input.GetAxis("Horizontal") < 0)
         {
             //左
             battleMapCursor.transform.DOKill();
@@ -2603,14 +2643,7 @@ public class BattleMapManager : MonoBehaviour
     public void SnapCursor()
     {
         //移動キーを離したら、座標が小数点以下なので整数にスナップさせる
-        if (Input.GetKeyUp(KeyCode.UpArrow) || Input.GetKeyUp(KeyCode.RightArrow) ||
-            Input.GetKeyUp(KeyCode.DownArrow) || Input.GetKeyUp(KeyCode.LeftArrow))
-        {
-            battleMapCursor.transform.DOMove(RoundPos(battleMapCursor.transform.position.x,
-                battleMapCursor.transform.position.y,
-                battleMapCursor.transform.position.z), 0.3f);
-        }
-        else if (Input.GetAxis("Vertical") == 0 && Input.GetAxis("Horizontal") == 0)
+        if (Input.GetAxis("Vertical") == 0 && Input.GetAxis("Horizontal") == 0)
         {
             battleMapCursor.transform.DOMove(RoundPos(battleMapCursor.transform.position.x,
                 battleMapCursor.transform.position.y,
@@ -2618,12 +2651,10 @@ public class BattleMapManager : MonoBehaviour
         }
     }
 
-    //移動キーボタン押下中にボタンを押すとバグる件対応
+    //移動キーボタン押下中にボタンを押すとバグる件対応　キー押下中はボタン操作させない
     private void checkMoveKeyDown()
     {
-        if(Input.GetKeyUp(KeyCode.UpArrow) || Input.GetKeyUp(KeyCode.RightArrow) ||
-            Input.GetKeyUp(KeyCode.DownArrow) || Input.GetKeyUp(KeyCode.LeftArrow)
-            || Input.GetAxis("Vertical") != 0 || Input.GetAxis("Horizontal") != 0){
+        if(Input.GetAxis("Vertical") != 0 || Input.GetAxis("Horizontal") != 0){
             isMoveKeyDown = true;
         }
         else
@@ -2636,7 +2667,7 @@ public class BattleMapManager : MonoBehaviour
     private void AdjustCamela()
     {
         //カメラの距離切り替えボタン
-        if (Input.GetKeyDown(KeyCode.C) || KeyConfigManager.GetKeyDown(KeyConfigType.ZOOM))
+        if (Input.GetButtonDown("Zoom") || KeyConfigManager.GetKeyDown(KeyConfigType.ZOOM))
         {
             //true、false切り替え
             isCloseCamera = isCloseCamera ? false : true;

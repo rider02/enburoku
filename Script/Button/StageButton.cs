@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
@@ -9,11 +7,8 @@ using UnityEngine.UI;
 public class StageButton : MonoBehaviour
 {
 
-    //ステージ名
-    [SerializeField]
-    Text buttonText;
-
-    private Chapter chapter;
+    [SerializeField] Text buttonText;   //ステージ名
+    private Chapter chapter;            //章
 
     private StageSelectManager stageSelectManager;
 
@@ -27,12 +22,14 @@ public class StageButton : MonoBehaviour
         this.stageSelectManager = stageSelectManager;
     }
 
+    //制御クラスに章を渡して会話シーンに遷移する
     public void Onclick()
     {
 
         stageSelectManager.ChangeSceneToMap(this.chapter);
     }
 
+    //選択 ステージ詳細をウィンドウに表示する
     public void OnSelect()
     {
         stageSelectManager.ChangeStageDetailWindowText(this.chapter);

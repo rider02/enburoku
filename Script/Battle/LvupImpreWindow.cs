@@ -5,16 +5,17 @@ using UnityEngine.UI;
 
 
 /// <summary>
-/// レベルアップ時のキャラの感想を表示するだけのメソッド
+/// 210521 レベルアップ時のキャラの感想を表示するUI制御用メソッド
 /// </summary>
 public class LvupImpreWindow : MonoBehaviour
 {
     [SerializeField]
-    Text lvupImpreText;
+    Text lvupImpreText;     //感想テキスト
 
     [SerializeField]
-    Image unitImage;
+    Image unitImage;        //ユニットの顔画像
 
+    //テキスト更新
     public void UpdateText(string lvupImpreText)
     {
         this.lvupImpreText.text = lvupImpreText;

@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 
-
+/// <summary>
+/// 職業ScriptableObject精製用クラス
+/// </summary>
 public class JobDatabase : ScriptableObject
 {
 

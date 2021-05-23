@@ -75,6 +75,7 @@ public class UseItemManager : MonoBehaviour
             string text = StatusUp(potion, unit);
             //メッセージウィンドウ表示
             battleMapManager.OpenMessageWindow(text);
+            battleMapManager.SetMapMode(MapMode.MESSAGE);
         }
 
         //使用回数を減らす
@@ -127,7 +128,7 @@ public class UseItemManager : MonoBehaviour
         }
 
 
-        }
+    }
 
     /// <summary>
     /// 210303 ユニットのステータス上昇 戦闘画面からはUseItem、ステータス画面からはこれを直接呼び出す

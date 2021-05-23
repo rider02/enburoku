@@ -1,9 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
-//出撃するユニットの人数を表示するだけのクラス
+//出撃準備の時、出撃するユニットの人数を表示するウィンドウ制御クラス
 public class EntryCountWindow : MonoBehaviour
 {
     [SerializeField] Text entryCountText;

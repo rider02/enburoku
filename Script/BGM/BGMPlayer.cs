@@ -1,14 +1,19 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// 210521 BGM再生用クラス
+/// </summary>
 public class BGMPlayer : SingletonMonoBehaviour<BGMPlayer>
 {
-
+    //タイトル
     [SerializeField] AudioClip bgmIntroAudioClip;
     [SerializeField] AudioClip bgmLoopAudioClip;
 
+    //ステータス
     [SerializeField] AudioClip bgmStatusIntroAudioClip;
     [SerializeField] AudioClip bgmStatusLoopAudioClip;
 
+    //戦闘1
     [SerializeField] AudioClip field1IntroAudioClip;
     [SerializeField] AudioClip field1LoopAudioClip;
 
@@ -37,7 +42,7 @@ public class BGMPlayer : SingletonMonoBehaviour<BGMPlayer>
             return;
         }
 
-        //アタッチされているオブジェクトはシーンを変更しても消えない
+        //シーンを変更しても消えない
         DontDestroyOnLoad(gameObject);
 
         introAudioSource = gameObject.AddComponent<AudioSource>();
@@ -68,11 +73,6 @@ public class BGMPlayer : SingletonMonoBehaviour<BGMPlayer>
         
     }
 
-    void Start()
-    {
-        
-    }
-
     private void Update()
     {
         if (isFadeOut)
@@ -92,6 +92,7 @@ public class BGMPlayer : SingletonMonoBehaviour<BGMPlayer>
         }
     }
 
+    //BGM再生
     public void PlayBGM()
     {
         if (introAudioSource == null)
@@ -112,6 +113,7 @@ public class BGMPlayer : SingletonMonoBehaviour<BGMPlayer>
         
     }
 
+    //BGM停止
     public void StopBGM()
     {
         if (introAudioSource == null)
@@ -186,6 +188,7 @@ public class BGMPlayer : SingletonMonoBehaviour<BGMPlayer>
         isFadeOut = true;
     }
 
+    //BGMプレイヤー削除
     public void DeleteBGMPlayer()
     {
         Destroy(gameObject);

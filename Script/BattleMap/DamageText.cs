@@ -1,10 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 using DG.Tweening;
 
+//ダメージ表示テキスト
 public class DamageText : MonoBehaviour
 {
 
@@ -18,7 +16,7 @@ public class DamageText : MonoBehaviour
     private float elapsedTime = 0f;
 
 
-    // Update is called once per frame
+    //自動で勝手に消える
     void Update()
     {
         //経過時間を取得する

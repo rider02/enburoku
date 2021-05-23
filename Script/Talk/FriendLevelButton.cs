@@ -1,10 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
 /// 支援会話レベルのボタン
+/// TODO 210522 まだ作りかけ 新着は文字色を水色にする機能を追加したい
 /// </summary>
 public class FriendLevelButton : MonoBehaviour
 {
@@ -13,13 +12,13 @@ public class FriendLevelButton : MonoBehaviour
 
     TalkManager talkManager;
 
-    //Initと言ってもオブジェクトを渡すだけ
+    //初期化
     public void Init(TalkManager talkManager)
     {
         this.talkManager = talkManager;
     }
 
-    //とりあえず昨日はテキストを変えるだけ＾＾；
+    //テキスト変更 A、B、Cの表示のみ
     public void UpdateText(string text)
     {
         buttonText.text = text;
@@ -28,7 +27,7 @@ public class FriendLevelButton : MonoBehaviour
     //ボタンがクリックされた時
     public void OnButtonClick()
     {
-        //読み込む支援会話をセットする
+        //読み込む支援会話をセットして会話シーンへ
         talkManager.setFriendTalk(this.gameObject.name);
         talkManager.ChangeSceneToTalk();
 

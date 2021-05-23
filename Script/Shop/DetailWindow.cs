@@ -1,49 +1,24 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 武器の詳細テキストへアクセスするメソッド
+/// 武器の詳細表示ウィンドウUI制御クラス
 /// </summary>
 public class DetailWindow : MonoBehaviour
 {
-    [SerializeField]
-    Text weaponName;
+    [SerializeField] Text weaponName;   //武器名
+    [SerializeField] Text endurance;    //使用回数
+    [SerializeField] Text detailText;   //特効、霊夢専用など
+    [SerializeField] Text featureText;  //細かい説明文
+    [SerializeField] Text attack;       //攻撃
+    [SerializeField] Text hit;          //命中率
+    [SerializeField] Text critical;     //必殺率
+    [SerializeField] Text delay;        //重さ
+    [SerializeField] Text skill;        //要求技能レベル
+    [SerializeField] Text range;        //射程距離
 
-    [SerializeField]
-    Text endurance;
-
-    [SerializeField]
-    Text detailText;
-
-    [SerializeField]
-    Text featureText;
-
-    [SerializeField]
-    Text attack;
-
-    [SerializeField]
-    Text hit;
-
-    [SerializeField]
-    Text critical;
-
-    [SerializeField]
-    Text delay;
-
-    [SerializeField]
-    Text skill;
-
-    [SerializeField]
-    Text range;
-
-
-
-    [SerializeField]
-    private Image icon;//210215 武器のアイコンを設定
-    [SerializeField]
-    private Sprite[] iconList;
+    [SerializeField] private Image icon;//210215 武器のアイコンを設定
+    [SerializeField] private Sprite[] iconList;
 
     /// <summary>
     /// 武器を選択されるとボタンから呼ばれるメソッド

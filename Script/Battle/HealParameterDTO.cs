@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 210216 BattleParameterDTOの一種 攻撃よりも表示する内容が少ない
+/// 210216 回復時にUIに各値を表示するDTO BattleParameterDTOとほぼ同じ
 /// </summary>
 public class HealParameterDTO : MonoBehaviour
 {

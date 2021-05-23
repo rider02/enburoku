@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// 210521 マップで敵にカーソルを合わせた時の簡易UI制御クラス
+/// UnitOutlineWindowと同じ実装を行う
+/// </summary>
 public class EnemyOutlineWindow : MonoBehaviour
 {
     [SerializeField]

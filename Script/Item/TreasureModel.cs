@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 宝箱クラスTreasureBoxをステージに配置する為のラッパー
+/// 宝箱クラスTreasureBoxをステージに配置する為のラッパー 座標を保持する
 /// </summary>
 public class TreasureModel : MonoBehaviour
 {

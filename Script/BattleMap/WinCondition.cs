@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-/// <summary>
+﻿/// <summary>
 /// 勝利条件をStageクラスに列挙型で持たせる
 /// </summary>
 public enum WinCondition
@@ -13,5 +9,4 @@ public enum WinCondition
     [StringValue("敵将の撃破")]
     BOSS,
 
-    //意外と少ねえな
 }

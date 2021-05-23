@@ -5,18 +5,26 @@ using UnityEngine.UI;
 
 /// <summary>
 /// 200726 ユニットのステータスを表示するウィンドウ
+/// 敵、味方共通なので変更を加える場合は両方に追記する
 /// </summary>
 public class StatusWindow : MonoBehaviour
 {
+    //名前
     [SerializeField] private Text name;
+
+    //レベル
     [SerializeField] private Text lvNum;
 
+    //種族
     [SerializeField] private Text race;
 
+    //職業
     [SerializeField] private Text job;
 
+    //経験値
     [SerializeField] private Text exp;
 
+    //経験値ゲージ
     [SerializeField] private Slider expGauge;
 
     //移動
@@ -74,6 +82,7 @@ public class StatusWindow : MonoBehaviour
     [SerializeField] private GameObject strikeGaugeFrame;
     [SerializeField] private GameObject healGaugeFrame;
 
+    //各技能の経験値ゲージ 具体的な数値は出さない仕様
     [SerializeField] private Slider shotGauge;
     [SerializeField] private Slider laserGauge;
     [SerializeField] private Slider strikeGauge;

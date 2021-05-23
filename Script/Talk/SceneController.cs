@@ -13,9 +13,8 @@ using UnityEngine.SceneManagement;
 /// </summary>
 public class SceneController : MonoBehaviour
 {
-    private GameController gc;
+    private TalkController gc;
     private BattleTalkManager battleTalkManager;
-    public Actions Actions;
 
     private GUIManager guiManager;
     private SceneHolder sceneHolder;
@@ -45,7 +44,7 @@ public class SceneController : MonoBehaviour
     FadeInOutManager fadeInOutManager;
 
     //コンストラクタ
-    public SceneController(GameController gc)
+    public SceneController(TalkController gc)
     {
         //GameControllerへのインスタンス作成
         this.gc = gc;
@@ -102,7 +101,7 @@ public class SceneController : MonoBehaviour
         if (currentScene != null)
         {
             //ボタンが押されたら
-            if (KeyConfigManager.GetKeyDown(KeyConfigType.SUBMIT))
+            if (KeyConfigManager.GetKeyDown(KeyConfigType.SUBMIT) || Input.GetButtonDown("Submit"))
             {
                 //選択肢が出ておらず、画像表示中でなければ次の処理へ
                 if (!isOptionsShowed && !imageSeq.IsPlaying())

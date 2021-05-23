@@ -1,9 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
+/// <summary>
+/// ゲーム開始時の各種設定を行うクラス
+/// </summary>
 public class PrepareGameStartManager : MonoBehaviour
 {
     [SerializeField] FadeInOutManager fadeInOutManager;
@@ -32,9 +33,9 @@ public class PrepareGameStartManager : MonoBehaviour
     GameObject selectedRoute;
     GameObject selectedDifficulty;
 
-    // Start is called before the first frame update
     void Start()
     {
+        //BGM再生
         GameObject bgmManager = GameObject.Find("BGMManager");
         if (bgmManager == null)
         {
@@ -92,7 +93,7 @@ public class PrepareGameStartManager : MonoBehaviour
             KeyConfigManager.ButtonClick();
         }
 
-        //キャンセルボタンを押されるとタイトル画面へ遷移する
+        //キャンセルボタン
         if (KeyConfigManager.GetKeyDown(KeyConfigType.CANCEL))
         {
             //ルート選択の時にキャンセルボタンでタイトル
@@ -130,6 +131,10 @@ public class PrepareGameStartManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// ボタンにフォーカスした時のUI制御関連
+    /// </summary>
+
     //霊夢にカーソルが合わさった時
     public void OnSelectReimu()
     {
@@ -151,7 +156,7 @@ public class PrepareGameStartManager : MonoBehaviour
         this.characterImage.sprite = Resources.Load<Sprite>("Image/Charactors/Remilia/normal");
     }
 
-    //難易度選択でフォーカスをした時のメソッド
+    //難易度選択でフォーカスした時
     public void OnSelectNormalMode()
     {
         mainCharacterText.text = "難易度\u00A0:\u00A0ノーマル";
@@ -159,7 +164,6 @@ public class PrepareGameStartManager : MonoBehaviour
 
         messageText.text = "【対象\u00A0:\u00A0初心者・中級者】\n SRPGが初めての方にもお楽しみ頂ける難易度です。";
     }
-
     public void OnSelectHardMode()
     {
         mainCharacterText.text = "難易度\u00A0:\u00A0ハード";
@@ -167,8 +171,6 @@ public class PrepareGameStartManager : MonoBehaviour
 
         messageText.text = "【対象\u00A0:\u00A0上級者】\n SRPGに自信が有る方向けの難易度です。";
     }
-
-    //モード選択でフォーカスをした時のメソッド
     public void OnSelectLunaticMode()
     {
         mainCharacterText.text = "モード\u00A0:\u00A0ルナティック";
@@ -177,6 +179,8 @@ public class PrepareGameStartManager : MonoBehaviour
         messageText.text = "【誰にも向かない】\n 最難関を求める方向けの難易度です。";
     }
 
+
+    //モード選択でフォーカスをした時
     public void OnSelectCasualMode()
     {
         mainCharacterText.text = "敗北したユニットの扱い\u00A0:\u00A0カジュアル";
@@ -199,6 +203,33 @@ public class PrepareGameStartManager : MonoBehaviour
         attributeText.enabled = false;
 
         messageText.text = "【対象\u00A0:\u00A0初心者・中級者】\u00A0 倒れた仲間は1回出撃不可になった後に復活します。";
+    }
+
+    /// <summary>
+    /// ボタン関連
+    /// </summary>
+
+    //霊夢ルートが押された時
+    public void OnClickReimu()
+    {
+        //ルートと初期ステージ設定
+        ModeManager.route = Route.REIMU;
+        ChapterManager.chapter = Chapter.STAGE1;
+
+        //戻るボタンを押した時用にフォーカス用ゲームオブジェクトを取得
+        selectedRoute = menuWindow.transform.Find("RouteView/ReimuButton").gameObject;
+
+        //難易度設定へ
+        ChangeModeToDifficulty();
+    }
+
+    //レミリアルートが押された時
+    public void OnClickRemilia()
+    {
+        ModeManager.route = Route.REMILLIA;
+        ChapterManager.chapter = Chapter.R_STAGE1;
+        selectedRoute = menuWindow.transform.Find("RouteView/RemilliaButton").gameObject;
+        ChangeModeToDifficulty();
     }
 
     /// <summary>
@@ -266,22 +297,7 @@ public class PrepareGameStartManager : MonoBehaviour
         ChangeSceneToStatus();
     }
 
-    public void OnClickReimu()
-    {
-        ModeManager.route = Route.REIMU;
-        ChapterManager.chapter = Chapter.STAGE1;
-
-        selectedRoute = menuWindow.transform.Find("RouteView/ReimuButton").gameObject;
-        ChangeModeToDifficulty();
-    }
-
-    public void OnClickRemilia()
-    {
-        ModeManager.route = Route.REMILLIA;
-        ChapterManager.chapter = Chapter.R_STAGE1;
-        selectedRoute = menuWindow.transform.Find("RouteView/RemilliaButton").gameObject;
-        ChangeModeToDifficulty();
-    }
+    
 
     //ルート確定時、モードを難易度設定に変更
     private void ChangeModeToDifficulty()
@@ -328,7 +344,7 @@ public class PrepareGameStartManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 210220 ゲーム設定画面の状態 絶対にここでしか使わないしここに設定してしまう
+    /// 210220 ゲーム設定画面の状態 このクラスでしか使用しない
     /// </summary>
     enum PrepareGameStartMode
     {

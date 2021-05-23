@@ -51,11 +51,12 @@ public class StageSelectManager : MonoBehaviour
             stageList = stageDatabase.stageList.FindAll(stage => stage.isReimuRoute == false);
         }
         
-        //210304 やっとゲーム進行度を反映
+        //210304 ゲーム進行度を反映
         foreach (Stage stage in stageList)
         {
             //chapterは数字で管理しているので、現在の進行度以下のステージを表示していく
-            //if(stage.chapter <= ChapterManager.chapter)
+            //210522 テストで全ステージを表示する場合はここをコメントアウト
+            if(stage.chapter <= ChapterManager.chapter)
             {
                 //Resources配下からボタンをロード
                 var itemButton = (Instantiate(Resources.Load("Prefabs/StageButton")) as GameObject).transform;
@@ -66,9 +67,6 @@ public class StageSelectManager : MonoBehaviour
                 //partyWindowオブジェクト配下にprefab作成
                 itemButton.transform.SetParent(stageWindow.transform);
             }
-
-            
-
         }
 
         //210206 BGM再生
@@ -160,7 +158,8 @@ public class StageSelectManager : MonoBehaviour
 
         //static変数に設定
         selectedChapter = chapter;
-        //STAGE1～10の名前で章前の会話を設定すればよい
+
+        //STAGE1～10の名前で章前の会話を設定
         TalkManager.sceneName = chapter.ToString();
 
         //200827 戦闘前会話を表示するTalk

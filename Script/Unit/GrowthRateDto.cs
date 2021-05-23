@@ -1,9 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-/// <summary>
-/// 200713 職業の成長率補正
+﻿/// <summary>
+/// 200713 職業の各ステータス成長率補正
 /// </summary>
 [System.Serializable]
 public class GrowthRateDto

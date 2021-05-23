@@ -5,7 +5,6 @@ using UnityEngine.UI;
 
 /// <summary>
 /// 210217 戦闘マップ、ステータス画面でスキルの詳細を表示するウィンドウ
-/// アイテムよりも文言が長いので作らざるを得なかった・・・
 /// </summary>
 public class SkillDetailWindow : MonoBehaviour
 {

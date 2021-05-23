@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// ステータス画面のモード(ステータス、装備等)を左上に表示するだけのクラス
+/// </summary>
 public class ModeWindow : MonoBehaviour
 {
     [SerializeField]
     Text modeText;
 
-    /// <summary>
-    /// 200726 現在のモードを表示するだけのウィンドウ
-    /// </summary>
-    /// <param name="text"></param>
+    //テキスト更新
     public void UpdateText(string text)
     {
 

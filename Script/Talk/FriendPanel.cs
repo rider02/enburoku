@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 /// <summary>
 /// 支援会話リストの名前を表示したりボタンを表示する
+/// TODO 210522 まだ作りかけ 新着は文字色を水色にする機能を追加したい
 /// </summary>
 public class FriendPanel : MonoBehaviour
 {
@@ -20,7 +21,7 @@ public class FriendPanel : MonoBehaviour
     }
 
     //支援会話ボタンをリストに追加する
-    public void addFriendLevelList(Transform friendLevelButton)
+    public void AddFriendLevelList(Transform friendLevelButton)
     {
         friendLevelButton.transform.SetParent(friendLevelList.transform);
     }

@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// 210522 戦闘画面で敵選択時に攻撃する武器を選ぶボタン
+/// 機能が全く違う為、MapItemButtonと分けている
+/// </summary>
 public class MapWeaponButton : MonoBehaviour
 {
     //武器名
@@ -71,7 +75,6 @@ public class MapWeaponButton : MonoBehaviour
 
     public void Onclick()
     {
-        //if()
         //戻るボタンを押した時にフォーカスを戻すオブジェクト選択
         battleMapManager.selectedItem = this.gameObject;
 

@@ -1,21 +1,15 @@
 ﻿using DG.Tweening;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 
 /// <summary>
-/// まずGameControllerから呼ばれ、それぞれのクラスのインスタンスを作る
-/// パーサー結果によってSceneReaderから各種画面処理のメソッドが呼ばれる
+/// パーサー(SceneReader)から呼ばれ、各種ノベルゲームの機能を実行するクラス(戦闘マップ用)
+/// 初期かはBattleTalkManagerから行われる
 /// </summary>
 public class BattleSceneController : MonoBehaviour
 {
-    private GameController gc;
     private BattleTalkManager battleTalkManager;
-    public Actions Actions;
 
     private GUIManager guiManager;
     private SceneHolder sceneHolder;
@@ -71,6 +65,7 @@ public class BattleSceneController : MonoBehaviour
         //終了フラグが立っていたら画面遷移　スタートボタンを押した場合はスキップ
         if (isEnd || KeyConfigManager.GetKeyDown(KeyConfigType.START))
         {
+            CharactorClear();
             battleTalkManager.TalkEnd();
         }
 
@@ -111,8 +106,7 @@ public class BattleSceneController : MonoBehaviour
     /// <summary>
     /// クリックされた時に呼ばれる
     /// 1行ずつSceneのテキストを取り出して表示やコマンドを実行する
-    /// 最初にGameControllerの初期化→SetSceneメソッドから呼ばれる
-    /// その後はマウスクリック時に呼び出し
+    /// 初期化の時とマウスクリック時に呼び出し
     /// </summary>
     public void SetNextProcess()
     {
@@ -132,7 +126,7 @@ public class BattleSceneController : MonoBehaviour
         }
     }
 
-    //シーンをセットする GameControllerに最初呼ばれる
+    //シーンをセットする
     public void SetScene(string id)
     {
         //現在のシーンをシーン一覧から取得してセット
@@ -149,7 +143,7 @@ public class BattleSceneController : MonoBehaviour
         
     }
 
-    //シーンが存在するか確認する
+    //引数のシーンが存在するか確認する
     public bool CheckSceneExist(string sceneName)
     {
         Scene scene = sceneHolder.Scenes.Find(s => s.ID == sceneName);
@@ -230,7 +224,7 @@ public class BattleSceneController : MonoBehaviour
     }
 
     //200616 シーン終了フラグを立てて、あと1度クリックしたら遷移するようにする
-    public void setIsEnd(bool flag)
+    public void SetIsEnd(bool flag)
     {
         isEnd = flag;
     }
@@ -253,8 +247,8 @@ public class BattleSceneController : MonoBehaviour
         foreach (BattleCharacter character in Characters)
         {
             //アタッチされているゲームオブジェクト(立ち絵)削除
+            Debug.Log($"削除{character.name}");
             Destroy(character.gameObject);
-            character.Destroy();
         }
         Characters = new List<BattleCharacter>();
     }
@@ -330,38 +324,17 @@ public class BattleSceneController : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 210515 キャラクターを移動させる
-    /// </summary>
-    /// <param name="name"></param>
-    /// <param name="pos"></param>
-    public void MoveCharactor(string name, string moveDest)
-    {
-        BattleCharacter character = Characters.FirstOrDefault(c => c.Name == name);
-        if(character == null)
-        {
-            Debug.Log("キャラクターが存在しません");
-            return;
-        }
-        if (moveDest == "center")
-        {
-            var pos = guiManager.MainCamera.ScreenToWorldPoint(Vector3.zero);
-            var pos2 = guiManager.MainCamera.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, 0));
-
-            //画面の幅
-            var posWidth = pos2.x - pos.x;
-
-            //立ち絵の位置 最初は画面中央
-            var cpos = new Vector3(pos.x + posWidth / 2, character.transform.position.y, 0);
-            character.transform.DOMove(cpos, 0.2f);
-        }
-    }
-
     //立ち絵の表情変更 #image_hiroko=aseriのように来た時呼ばれる
     public void SetImage(string name, string ID)
     {
-        //キャラクターリストから引数の名前で検索 存在しないとぬるぽ
+        //キャラクターリストから引数の名前で検索
         var character = Characters.Find(c => c.Name == name);
+
+        if(character == null)
+        {
+            Debug.LogError("立ち絵を変更するキャラクターが存在しません");
+            return;
+        }
         character.SetImage(ID);
     }
 

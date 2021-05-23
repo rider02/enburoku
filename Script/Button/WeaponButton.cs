@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 買う、売る、修理の機能を持つボタン
+/// お店で使用 買う、売る、修理の機能を持つボタン
 /// </summary>
 public class WeaponButton : MonoBehaviour
 {

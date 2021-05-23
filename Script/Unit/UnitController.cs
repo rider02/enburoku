@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using System.Linq;
 
 public class UnitController : MonoBehaviour
 {
@@ -13,19 +13,19 @@ public class UnitController : MonoBehaviour
 
     public static bool isInit;
 
-    private BattleMapManager battleMapManager;
-
-    public void initUnitList(UnitDatabase unitDatabase)
+    public void InitUnitList(UnitDatabase unitDatabase)
     {
-        //実際は仲間になったタイミングで入れていく
+        unitList = new List<Unit>();
+
         //200830 ルートを設定
         if (ModeManager.route == Route.REIMU)
         {
-            unitList = unitDatabase.unitList.FindAll(unit => unit.isReimuRoute == true);
+            unitList.Add(unitDatabase.unitList.First(c => c.name == "霊夢"));
         }
         else
         {
-            unitList = unitDatabase.unitList.FindAll(unit => unit.isReimuRoute == false);
+            //レミリアルート
+            unitList.Add(unitDatabase.unitList.First(c => c.name == "レミリア"));
         }
 
         isInit = true;
@@ -34,7 +34,7 @@ public class UnitController : MonoBehaviour
     /// <summary>
     /// PartyWindowのボタン一覧を作る初期化メソッド
     /// </summary>
-    public void initPartyList(StatusManager statusManager)
+    public void InitPartyList(StatusManager statusManager)
     {
 
         foreach (var unit in unitList)
@@ -62,7 +62,7 @@ public class UnitController : MonoBehaviour
     /// BattleシーンでPartyWindowのボタン一覧を作る初期化メソッド
     /// 引数の違いを処理するのが難しいので2つ作ってしまう
     /// </summary>
-    public void initBattlePartyList(BattleManager battleManager)
+    public void InitBattlePartyList(BattleManager battleManager)
     {
 
         foreach (var unit in unitList)
@@ -84,7 +84,7 @@ public class UnitController : MonoBehaviour
         }
     }
 
-    //200809 先頭に参加するユニット一覧を作成する
+    //200809 戦闘に参加するユニット一覧を作成する
     public void InitPreparePartyList(BattleMapManager battleMapManager, GameObject unitSelectView)
     {
         int count = 0;
@@ -136,7 +136,7 @@ public class UnitController : MonoBehaviour
     /// </summary>
     /// <param name="unitName"></param>
     /// <param name="item"></param>
-    public void setItem(string unitName,Item item)
+    public void SetItem(string unitName,Item item)
     {
         foreach (var unit in unitList)
         {
@@ -146,7 +146,7 @@ public class UnitController : MonoBehaviour
 
     }
 
-    public void updateUnit(Unit updatedUnit)
+    public void UpdateUnit(Unit updatedUnit)
     {
         var tmpList = new List<Unit>();
 
@@ -186,6 +186,44 @@ public class UnitController : MonoBehaviour
         }
 
         unitList = tmpList;
+    }
+
+    //210523 戦闘開始前にユニットを追加する処理
+    public void AddUnitBeforeBattle(Chapter chapter, UnitDatabase unitDatabase)
+    {
+        //TODO 今後フリーマップを実装した時に敗北したユニットを再度追加しないように・・・
+        Unit unit;
+        //ステージ2 文ちゃん加入
+        if (Chapter.STAGE2 == chapter)
+        {
+            unit = unitDatabase.unitList.First(c => c.name == "文");
+
+            if (!unitList.Exists(c => c.name == unit.name))
+            {
+                unitList.Add(unit);
+                Debug.Log($"ユニット加入 : {unit.name}");
+            }
+        }
+
+        
+    }
+
+    //210523 戦闘後にユニットを追加する処理
+    public void AddUnitAfterBattle(Chapter chapter , UnitDatabase unitDatabase)
+    {
+        Unit unit;
+
+        if (Chapter.STAGE1 == chapter)
+        {
+            unit = unitDatabase.unitList.First(c => c.name == "魔理沙");
+            if (!unitList.Exists(c => c.name == unit.name))
+            {
+                unitList.Add(unit);
+                Debug.Log($"ユニット加入 : {unit.name}");
+            }
+        }
+
+
     }
 
 }

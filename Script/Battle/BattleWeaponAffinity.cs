@@ -1,13 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
+﻿
 /// <summary>
-/// 武器の有利不利クラス 要らないかも知れないけど分かりやすさ優先＾＾；
+/// プレイヤーの敵に対する武器の有利不利クラス
 /// </summary>
 public enum BattleWeaponAffinity
 {
-    ADVANTAGE,
-    DISADVANTAGE,
-    EQUAL
+    ADVANTAGE,      //有利
+    DISADVANTAGE,   //不利
+    EQUAL           //等倍
 }

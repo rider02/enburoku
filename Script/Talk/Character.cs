@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using System.Linq;
 using DG.Tweening;
 
-//立ち絵のクラス
+//立ち絵のクラス　(会話シーン用)
 public class Character : MonoBehaviour {
 
     private GameObject charactorObject;
@@ -14,11 +14,6 @@ public class Character : MonoBehaviour {
     private CanvasGroup canvasGroup;
 
     public string Name { get; private set; }
-    
-    void Start ()
-    {
-
-    }
 
     public void Init(string name)
     {
