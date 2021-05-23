@@ -117,17 +117,20 @@ public class SceneReader
                     sceneController.SetBackGround(line);
                 }
                 //200616 シーン終了 #end ステータス画面へ戻る
-                else if (line.Contains("end"))
+                else if (line.Contains("status"))
                 {
-                    line = line.Replace("end", "");
+                    line = line.Replace("status", "");
                     sceneController.sceneChangeDestination = DestinationScene.STATUS;
-                    sceneController.setIsEnd(true);
                 }
                 //200818 戦闘前会話で使用 #map: 戦闘マップへ遷移
                 else if (line.Contains("map"))
                 {
                     line = line.Replace("map", "");
                     sceneController.sceneChangeDestination = DestinationScene.MAP;
+                }
+                else if (line.Contains("end"))
+                {
+                    line = line.Replace("end", "");
                     sceneController.setIsEnd(true);
                 }
                 /*#options={
