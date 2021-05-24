@@ -538,9 +538,18 @@ public class BattleMapManager : MonoBehaviour
         //メニューボタン
         MenuButton();
 
-        //200725 キャンセルボタン
-        CancelButton();
+        //200725 キャンセルボタン メソッドを直接呼び出すボタンも有るので、GetKeyDownはここから変えないこと
+        if (KeyConfigManager.GetKeyDown(KeyConfigType.CANCEL) || Input.GetButton("Cancel"))
+        {
+            if (deltaTime <= BUTTON_WAIT)
+            {
+                return;
+            }
 
+            //ボタン連打防止
+            deltaTime = 0;
+            CancelButton();
+        }
 
         //出撃準備の時は行わない処理
         if(mapMode != MapMode.PREPARATION && mapMode != MapMode.UNIT_SELECT)
@@ -635,7 +644,7 @@ public class BattleMapManager : MonoBehaviour
         {
             //特定のモードの場合は表示しない
             if (mapMode == MapMode.BATTLE_CONFIRM || mapMode == MapMode.ENEMY_TURN_START || mapMode == MapMode.ENEMY_TURN
-                || mapMode == MapMode.ENEMY_MOVE)
+                || mapMode == MapMode.ENEMY_MOVE || mapMode == MapMode.BATTLE)
             {
                 mapUnitOutlineWindow.gameObject.SetActive(false);
                 return;
@@ -2049,7 +2058,7 @@ public class BattleMapManager : MonoBehaviour
                             //戦闘確認からの戻り先モード判定の為
                             isAttackConfirm = true;
 
-                            mapMode = MapMode.BATTLE_CONFIRM;
+                            SetMapMode(MapMode.BATTLE_CONFIRM);
                             //200814 戦闘画面を開く
                             battleManager.MapOpenBattleView(mainMap.ActiveUnit, mainMap.ActiveEnemy, true);
                         }
@@ -2275,219 +2284,211 @@ public class BattleMapManager : MonoBehaviour
     public void CancelButton()
     {
         //200725 キャンセルボタン
-        if (KeyConfigManager.GetKeyDown(KeyConfigType.CANCEL) || Input.GetButton("Cancel"))
+        
+        
+
+        //エディットモード時は専用メソッドに処理を委ねる
+        if (mapEditManager.isEditorMode)
         {
-            if (deltaTime <= BUTTON_WAIT)
+            mapEditManager.EditCancelButton();
+            return;
+        }
+
+        //210217 メッセージウィンドウは優先度高く設定
+        if (isMessaseExist)
+        {
+            CloseMessageWindow();
+            return;
+        }
+
+        //200816 キャンセルボタンでマップメニュー開
+        if (mapMode == MapMode.NORMAL)
+        {
+            Debug.Log("mapmenu");
+            mapMode = MapMode.MAP_MENU;
+            mapMenuView.SetActive(true);
+            battleConditionWindow.UpdateUnitCount(unitContainer.childCount, enemyContainer.childCount);
+            EventSystem.current.SetSelectedGameObject(null);
+            EventSystem.current.SetSelectedGameObject(mapMenuView.transform.Find("MapMenuWindow/TurnEndButton").gameObject);
+        }
+
+        else if (mapMode == MapMode.MAP_VIEW)
+        {
+            //マップ確認中の時
+            mapMode = MapMode.PREPARATION;
+            Debug.Log($"mapMode:{mapMode}");
+
+            //セルの情報などが表示されるUIを非表示、戦闘準備ウィンドウ表示
+            mapView.SetActive(false);
+            preparationWindow.SetActive(true);
+
+            //「マップ確認」ボタンにフォーカス
+            EventSystem.current.SetSelectedGameObject(null);
+            EventSystem.current.SetSelectedGameObject(preparationMenuWindow.transform.Find("SearchButton").gameObject);
+        }
+
+        //200816 既にマップメニュー表示中の時は閉じる
+        else if (mapMode == MapMode.MAP_MENU)
+        {
+
+            mapMode = MapMode.NORMAL;
+            mapMenuView.SetActive(false);
+        }
+
+        //出撃準備時に押されたらステージ選択に戻る
+        else if (mapMode == MapMode.PREPARATION)
+        {
+            Retire();
+        }
+
+        else if (mapMode == MapMode.UNIT_SELECT)
+        {
+            //ユニット選択時
+            preparationMenuWindow.SetActive(true);
+            stageDetailWindow.SetActive(true);
+            unitSelectView.SetActive(false);
+            unitOutlineWindow.gameObject.SetActive(false);
+            mapMode = MapMode.PREPARATION;
+            Debug.Log($"mapMode:{mapMode}");
+            EventSystem.current.SetSelectedGameObject(preparationMenuWindow.transform.Find("BattleStartButton").gameObject);
+
+        }
+        else if (mapMode == MapMode.WEAPON_SELECT || mapMode == MapMode.HEAL_SELECT || mapMode == MapMode.ITEM_SELECT)
+        {
+            //武器ボタンを削除する
+            battleManager.DeleteButtleWeaponButton();
+
+            //アイテムボタンをすべて削除する
+            DeleteWeaponWindowItem();
+
+            mapMode = MapMode.MOVEDMENU;
+            battleManager.CloseWeaponWindow();
+            itemDetailWindow.SetActive(false);
+            movedMenuWindow.SetActive(true);
+            EventSystem.current.SetSelectedGameObject(selectedMovedMenuItem);
+        }
+        else if (mapMode == MapMode.ATTACK_SELECT || mapMode == MapMode.HEAL_TARGET_SELECT)
+        {
+            //攻撃対象選択時
+
+            //セルのハイライトを消す
+            mainMap.ResetAttackableCells();
+            //モードを武器選択へ
+            if (mapMode == MapMode.ATTACK_SELECT)
             {
-                return;
+                mapMode = MapMode.WEAPON_SELECT;
+            }
+            else
+            {
+                //回復の杖の場合
+                mapMode = MapMode.HEAL_SELECT;
             }
 
-            //ボタン連打防止
-            deltaTime = 0;
+            weaponWindow.SetActive(true);
+            detailWindow.SetActive(true);
 
-            //エディットモード時は専用メソッドに処理を委ねる
-            if (mapEditManager.isEditorMode)
-            {
-                mapEditManager.EditCancelButton();
-                return;
-            }
+            //一度nullにしないでWindowを表示非表示すると選択済みでなくなるっぽい
+            //選択したボタンへフォーカスを戻す
+            EventSystem.current.SetSelectedGameObject(null);
+            EventSystem.current.SetSelectedGameObject(selectedItem);
+        }
+        else if (mapMode == MapMode.BATTLE_CONFIRM)
+        {
+            //戦闘開始の確認画面の時
+            //ウィンドウを閉じてモードをATTACK_SELECTへ
+            battleManager.MapCloseBattleView();
 
-            //210217 メッセージウィンドウは優先度高く設定
-            if (isMessaseExist)
-            {
-                CloseMessageWindow();
-                return;
-            }
-
-            //200816 キャンセルボタンでマップメニュー開
-            if (mapMode == MapMode.NORMAL)
-            {
-                Debug.Log("mapmenu");
-                mapMode = MapMode.MAP_MENU;
-                mapMenuView.SetActive(true);
-                battleConditionWindow.UpdateUnitCount(unitContainer.childCount, enemyContainer.childCount);
-                EventSystem.current.SetSelectedGameObject(null);
-                EventSystem.current.SetSelectedGameObject(mapMenuView.transform.Find("MapMenuWindow/TurnEndButton").gameObject);
-            }
-
-            else if (mapMode == MapMode.MAP_VIEW)
-            {
-                //マップ確認中の時
-                mapMode = MapMode.PREPARATION;
-                Debug.Log($"mapMode:{mapMode}");
-
-                //セルの情報などが表示されるUIを非表示、戦闘準備ウィンドウ表示
-                mapView.SetActive(false);
-                preparationWindow.SetActive(true);
-
-                //「マップ確認」ボタンにフォーカス
-                EventSystem.current.SetSelectedGameObject(null);
-                EventSystem.current.SetSelectedGameObject(preparationMenuWindow.transform.Find("SearchButton").gameObject);
-            }
-
-            //200816 既にマップメニュー表示中の時は閉じる
-            else if (mapMode == MapMode.MAP_MENU)
+            //再度攻撃可能範囲を表示
+            if (isAttackConfirm)
             {
 
-                mapMode = MapMode.NORMAL;
-                mapMenuView.SetActive(false);
-            }
-
-            //出撃準備時に押されたらステージ選択に戻る
-            else if (mapMode == MapMode.PREPARATION)
-            {
-                Retire();
-            }
-
-            else if (mapMode == MapMode.UNIT_SELECT)
-            {
-                //ユニット選択時
-                preparationMenuWindow.SetActive(true);
-                stageDetailWindow.SetActive(true);
-                unitSelectView.SetActive(false);
-                unitOutlineWindow.gameObject.SetActive(false);
-                mapMode = MapMode.PREPARATION;
-                Debug.Log($"mapMode:{mapMode}");
-                EventSystem.current.SetSelectedGameObject(preparationMenuWindow.transform.Find("BattleStartButton").gameObject);
-
-            }
-            else if (mapMode == MapMode.WEAPON_SELECT || mapMode == MapMode.HEAL_SELECT || mapMode == MapMode.ITEM_SELECT)
-            {
-                //武器ボタンを削除する
-                battleManager.DeleteButtleWeaponButton();
-
-                //アイテムボタンをすべて削除する
-                DeleteWeaponWindowItem();
-
-                mapMode = MapMode.MOVEDMENU;
-                battleManager.CloseWeaponWindow();
-                itemDetailWindow.SetActive(false);
-                movedMenuWindow.SetActive(true);
-                EventSystem.current.SetSelectedGameObject(selectedMovedMenuItem);
-            }
-            else if (mapMode == MapMode.ATTACK_SELECT || mapMode == MapMode.HEAL_TARGET_SELECT)
-            {
-                //攻撃対象選択時
-
-                //セルのハイライトを消す
-                mainMap.ResetAttackableCells();
-                //モードを武器選択へ
-                if (mapMode == MapMode.ATTACK_SELECT)
+                if (mainMap.ActiveUnit.unit.equipWeapon != null)
                 {
-                    mapMode = MapMode.WEAPON_SELECT;
-                }
-                else
-                {
-                    //回復の杖の場合
-                    mapMode = MapMode.HEAL_SELECT;
-                }
-
-                weaponWindow.SetActive(true);
-                detailWindow.SetActive(true);
-
-                //一度nullにしないでWindowを表示非表示すると選択済みでなくなるっぽい
-                //選択したボタンへフォーカスを戻す
-                EventSystem.current.SetSelectedGameObject(null);
-                EventSystem.current.SetSelectedGameObject(selectedItem);
-            }
-            else if (mapMode == MapMode.BATTLE_CONFIRM)
-            {
-                //戦闘開始の確認画面の時
-                //ウィンドウを閉じてモードをATTACK_SELECTへ
-                battleManager.MapCloseBattleView();
-
-                //再度攻撃可能範囲を表示
-                if (isAttackConfirm)
-                {
-
-                    if (mainMap.ActiveUnit.unit.equipWeapon != null)
-                    {
-                        Attack(mainMap.ActiveUnit.unit.equipWeapon);
-                    }
-                }
-                else
-                {
-                    //杖の場合
-                    if (mainMap.ActiveUnit.unit.equipHealRod == null)
-                    {
-                        Debug.Log("ERROR : 回復の杖を持っていません");
-                    }
-                    Attack(mainMap.ActiveUnit.unit.equipHealRod);
+                    Attack(mainMap.ActiveUnit.unit.equipWeapon);
                 }
             }
-            else if (mapMode == MapMode.ITEM_USE_CONFIRM)
+            else
             {
-                //210217 道具の使用確認の時
-                //モードを道具選択に
-                mapMode = MapMode.ITEM_SELECT;
-
-                //非表示に
-                useItemConfirmWindow.SetActive(false);
-
-                //道具選択ウィンドウ表示
-                weaponWindow.SetActive(true);
-                itemDetailWindow.SetActive(true);
-
-                //選択していたオブジェクトにフォーカス
-                EventSystem.current.SetSelectedGameObject(selectedItem);
-            }
-
-            //移動範囲表示中の場合
-            else if (mapMode == MapMode.MOVE)
-            {
-
-                //とりあえず、移動可能なマスを消す
-                mainMap.ResetMovableCells();
-                mainMap.ResetAttackableCells();
-                mapMode = MapMode.NORMAL;
-            }
-
-            //移動後のメニュー表示中の場合
-            else if (mapMode == MapMode.MOVEDMENU)
-            {
-
-                //アニメーション無しで瞬間移動させてNORMALへ
-                mainMap.ActiveUnit.ReturnTo(beforeCell);
-
-                //210221 敵の攻撃可能範囲を再計算
-                mainMap.CancelReloadHighLightCells();
-
-                movedMenuWindow.SetActive(false);
-                mapMode = MapMode.NORMAL;
-                EventSystem.current.SetSelectedGameObject(null);
-            }
-            else if (mapMode == MapMode.STATUS)
-            {
-                //ステータス画面表示中
-                //無限に増えないように作ったボタンを削除
-                statusWindow.GetComponent<StatusWindow>().DeleteSkillButtonAndItemButton();
-
-                //モードを自軍ターンへ移動して何も選択しない
-                statusWindow.SetActive(false);
-                mapMode = returnMapMode;
-                EventSystem.current.SetSelectedGameObject(null);
-            }
-
-            else if (mapMode == MapMode.ITEM_EQUIP_USE_MENU)
-            {
-                //アイテムの装備、使うメニューを表示している時
-                //モードをアイテム選択へ
-                mapMode = MapMode.ITEM_SELECT;
-                Debug.Log($"mapMode:{mapMode}");
-
-                //アイテムを「預ける」、「装備」ウィンドウを表示している時
-                //ウィンドウを閉じる
-                ItemUseEquipWindow.SetActive(false);
-
-                //ボタンを活性化
-                foreach (Transform weaponButton in weaponWindow.transform)
+                //杖の場合
+                if (mainMap.ActiveUnit.unit.equipHealRod == null)
                 {
-                    weaponButton.GetComponent<Button>().interactable = true;
+                    Debug.Log("ERROR : 回復の杖を持っていません");
                 }
-
-                //フォーカスを元のアイテムボタンへ戻す
-                EventSystem.current.SetSelectedGameObject(selectedItem);
+                Attack(mainMap.ActiveUnit.unit.equipHealRod);
             }
+        }
+        else if (mapMode == MapMode.ITEM_USE_CONFIRM)
+        {
+            //210217 道具の使用確認の時
+            //モードを道具選択に
+            mapMode = MapMode.ITEM_SELECT;
+
+            //非表示に
+            useItemConfirmWindow.SetActive(false);
+
+            //道具選択ウィンドウ表示
+            weaponWindow.SetActive(true);
+            itemDetailWindow.SetActive(true);
+
+            //選択していたオブジェクトにフォーカス
+            EventSystem.current.SetSelectedGameObject(selectedItem);
+        }
+
+        //移動範囲表示中の場合
+        else if (mapMode == MapMode.MOVE)
+        {
+
+            //とりあえず、移動可能なマスを消す
+            mainMap.ResetMovableCells();
+            mainMap.ResetAttackableCells();
+            mapMode = MapMode.NORMAL;
+        }
+
+        //移動後のメニュー表示中の場合
+        else if (mapMode == MapMode.MOVEDMENU)
+        {
+
+            //アニメーション無しで瞬間移動させてNORMALへ
+            mainMap.ActiveUnit.ReturnTo(beforeCell);
+
+            //210221 敵の攻撃可能範囲を再計算
+            mainMap.CancelReloadHighLightCells();
+
+            movedMenuWindow.SetActive(false);
+            mapMode = MapMode.NORMAL;
+            EventSystem.current.SetSelectedGameObject(null);
+        }
+        else if (mapMode == MapMode.STATUS)
+        {
+            //ステータス画面表示中
+            //無限に増えないように作ったボタンを削除
+            statusWindow.GetComponent<StatusWindow>().DeleteSkillButtonAndItemButton();
+
+            //モードを自軍ターンへ移動して何も選択しない
+            statusWindow.SetActive(false);
+            mapMode = returnMapMode;
+            EventSystem.current.SetSelectedGameObject(null);
+        }
+
+        else if (mapMode == MapMode.ITEM_EQUIP_USE_MENU)
+        {
+            //アイテムの装備、使うメニューを表示している時
+            //モードをアイテム選択へ
+            mapMode = MapMode.ITEM_SELECT;
+            Debug.Log($"mapMode:{mapMode}");
+
+            //アイテムを「預ける」、「装備」ウィンドウを表示している時
+            //ウィンドウを閉じる
+            ItemUseEquipWindow.SetActive(false);
+
+            //ボタンを活性化
+            foreach (Transform weaponButton in weaponWindow.transform)
+            {
+                weaponButton.GetComponent<Button>().interactable = true;
+            }
+
+            //フォーカスを元のアイテムボタンへ戻す
+            EventSystem.current.SetSelectedGameObject(selectedItem);
         }
     }
 
